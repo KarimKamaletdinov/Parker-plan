@@ -1,6 +1,6 @@
 ﻿using ParkerPlan.Abstractions.Dtos;
 
-namespace ParkerPlan.Abstractions.Commands
+namespace ParkerPlan.Abstractions.Queries
 {
     public class GetGoods : Query<GoodDto>
     {
