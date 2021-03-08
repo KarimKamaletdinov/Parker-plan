@@ -2,8 +2,8 @@
 {
     public enum PayMethod
     {
-        Round,
-        Pen,
-        Roller
+        CashOnTaking,
+        CardOnTaking,
+        CardOnOrdering
     }
 }

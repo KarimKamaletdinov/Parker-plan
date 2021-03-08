@@ -2,8 +2,9 @@
 {
     public enum DeliveryMethod
     {
-        Round,
-        Pen,
-        Roller
+        OurDeliverer,
+        FromMarket,
+        SdekDeliverer,
+        FromSdek
     }
 }
