@@ -2,7 +2,7 @@
 
 namespace ParkerPlan.Abstractions.Queries
 {
-    public class GetGoods : Query<GoodDto>
+    public class GetGoods : Query<GoodDto[]>
     {
 
     }
