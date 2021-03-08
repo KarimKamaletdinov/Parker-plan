@@ -5,7 +5,7 @@ using ParkerPlan.Abstractions.Enums;
 
 namespace ParkerPlan.Abstractions.Dtos
 {
-    class LeadDto
+    public class LeadDto
     {
         public int Id { get; set; }
         public string CustomerName { get; set; }

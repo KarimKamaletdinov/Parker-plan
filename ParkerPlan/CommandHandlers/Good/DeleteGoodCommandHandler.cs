@@ -1,8 +1,9 @@
 ﻿using ParkerPlan.Abstractions;
 using ParkerPlan.Abstractions.Commands;
+using ParkerPlan.Abstractions.Commands.Good;
 using ParkerPlan.Repositories;
 
-namespace ParkerPlan.CommandHandlers
+namespace ParkerPlan.CommandHandlers.Good
 {
     public class DeleteGoodCommandHandler : ICommandHandler<DeleteGood>
     {

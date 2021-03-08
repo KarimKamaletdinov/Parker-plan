@@ -14,4 +14,8 @@
     <ProjectReference Include="..\ParkerPlan.Abstractions\ParkerPlan.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CommandHandlers\Lead\" />
+  </ItemGroup>
+
 </Project>

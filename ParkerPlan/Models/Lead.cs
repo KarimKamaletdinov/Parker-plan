@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ParkerPlan.Abstractions.Enums;
 
 namespace ParkerPlan.Models
 {
-    class Lead
+    public class Lead
     {
         public int Id { get; set; }
         public string CustomerName { get; set; }
