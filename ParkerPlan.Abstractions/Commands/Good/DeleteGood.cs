@@ -1,4 +1,4 @@
-﻿namespace ParkerPlan.Abstractions.Commands
+﻿namespace ParkerPlan.Abstractions.Commands.Good
 {
     public class DeleteGood : Command
     {

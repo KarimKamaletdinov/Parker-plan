@@ -1,10 +1,9 @@
 ﻿using ParkerPlan.Abstractions;
 using ParkerPlan.Abstractions.Commands;
-using ParkerPlan.Abstractions.Enums;
-using ParkerPlan.Models;
+using ParkerPlan.Abstractions.Commands.Good;
 using ParkerPlan.Repositories;
 
-namespace ParkerPlan.CommandHandlers
+namespace ParkerPlan.CommandHandlers.Good
 {
     public class InsertGoodCommandHandler : ICommandHandler<InsertGood>
     {
@@ -17,7 +16,7 @@ namespace ParkerPlan.CommandHandlers
 
         public void Execute(InsertGood command)
         {
-            _repository.Insert(new Good
+            _repository.Insert(new Models.Good
             {
                 ParkerId = command.Good.ParkerId,
                 Name = command.Good.Name,

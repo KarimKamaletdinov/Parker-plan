@@ -1,6 +1,6 @@
 ﻿using ParkerPlan.Abstractions.Dtos;
 
-namespace ParkerPlan.Abstractions.Commands
+namespace ParkerPlan.Abstractions.Commands.Good
 {
     public class UpdateGood : Command
     {

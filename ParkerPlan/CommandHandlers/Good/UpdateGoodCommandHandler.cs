@@ -1,9 +1,9 @@
 ﻿using ParkerPlan.Abstractions;
 using ParkerPlan.Abstractions.Commands;
-using ParkerPlan.Models;
+using ParkerPlan.Abstractions.Commands.Good;
 using ParkerPlan.Repositories;
 
-namespace ParkerPlan.CommandHandlers
+namespace ParkerPlan.CommandHandlers.Good
 {
     public class UpdateGoodCommandHandler : ICommandHandler<UpdateGood>
     {
@@ -16,7 +16,7 @@ namespace ParkerPlan.CommandHandlers
 
         public void Execute(UpdateGood command)
         {
-            _repository.Update(new Good
+            _repository.Update(new Models.Good
             {
                 ParkerId = command.Good.ParkerId,
                 Name = command.Good.Name,

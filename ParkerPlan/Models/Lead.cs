@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ParkerPlan.Abstractions.Enums;
 
-namespace ParkerPlan.Abstractions.Dtos
+namespace ParkerPlan.Models
 {
-    public class LeadDto
+    public class Lead
     {
         public int Id { get; set; }
         public string CustomerName { get; set; }
@@ -24,6 +22,6 @@ namespace ParkerPlan.Abstractions.Dtos
         public DeliveryMethod DeliveryMethod { get; set; }
         public PayMethod PayMethod { get; set; }
         public string Comment { get; set; }
-        public int? FullPrice { get; set; }
+        public int? FullPrice => 0;
     }
 }
