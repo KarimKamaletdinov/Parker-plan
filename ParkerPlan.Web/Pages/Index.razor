@@ -1,0 +1,13 @@
+﻿@page "/"
+@using ParkerPlan.QueryHandlers
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Web.Data
+@inject GoodsService Service
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@Service.GetAll()
+
+<SurveyPrompt Title="How is Blazor working for you?" />
