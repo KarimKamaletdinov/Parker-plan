@@ -77,7 +77,7 @@ namespace ParkerPlan.Repositories
 
         public Good[] GetAll()
         {
-            var a = new SqlConnection(_connectionString).Query<SqlGoodDto>("SELECT * FROM Pens");
+            var a = new SqlConnection(_connectionString).Query<SqlGoodDto>("SELECT * FROM Goods");
 
             var result = new List<Good>();
 

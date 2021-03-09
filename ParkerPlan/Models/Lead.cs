@@ -1,4 +1,5 @@
 ﻿using System;
+using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Enums;
 
 namespace ParkerPlan.Models
@@ -16,7 +17,7 @@ namespace ParkerPlan.Models
         public bool Agreed { get; set; }
         public bool Payed { get; set; }
         public bool Delivered { get; set; }
-        public int[] PenIds { get; set; }
+        public GoodLeadDto[] Goods { get; set; }
         public DateTime CreatingDate { get; set; }
         public DateTime DeliveryDate { get; set; }
         public DeliveryMethod DeliveryMethod { get; set; }
