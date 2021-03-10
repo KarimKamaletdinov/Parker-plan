@@ -1,13 +1,35 @@
 ﻿@page "/"
-@using ParkerPlan.QueryHandlers
-@using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Web.Data
 @inject GoodsService Service
+<h1>
+    Ручки Паркер
+</h1>
 
-<h1>Hello, world!</h1>
+@foreach (var pen in Service.GetAll())
+{
+    @SetV("/pen/" + pen.ParkerId)
+    
+    <div style="display: inline-block; border: 1px gray solid; margin: 10px; align-items: center;
+                                  background: white">
+        <a href=@($"/pen/{pen.ParkerId}") style="text-decoration: none">
+            @{
+                var w = $"PEN{pen.ParkerId}.bmp";
+            }
+            <img src=@w />
+            <h5 style="padding: 0 0 0 15px">
+                @pen.Name
+            </h5>
+        </a>
+    </div>
+}
 
-Welcome to your new app.
+@code
+{
+    private string value { get; set; }
 
-@Service.GetAll()
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+    private string SetV(string v)
+    {
+        value = v;
+        return "";
+    }
+}
