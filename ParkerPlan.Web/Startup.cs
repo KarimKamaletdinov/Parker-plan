@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MudBlazor;
+using MudBlazor.Services;
 using ParkerPlan.QueryHandlers;
 using ParkerPlan.Repositories;
 
@@ -58,5 +60,36 @@ namespace ParkerPlan.Web
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
+    }
+
+    class Rls : IResizeListenerService
+    {
+        public void Dispose()
+        {
+         
+        }
+
+        public ValueTask<BrowserWindowSize> GetBrowserWindowSize()
+        {
+            return new ValueTask<BrowserWindowSize>(new BrowserWindowSize());
+        }
+
+        public Task<bool> IsMediaSize(Breakpoint breakpoint)
+        {
+            return new Task<bool>(() => true);
+        }
+
+        public bool IsMediaSize(Breakpoint breakpoint, Breakpoint reference)
+        {
+            return true;
+        }
+
+        public Task<Breakpoint> GetBreakpoint()
+        {
+            return new Task<Breakpoint>(() => Breakpoint.Always);
+        }
+
+        public event EventHandler<BrowserWindowSize>? OnResized;
+        public event EventHandler<Breakpoint>? OnBreakpointChanged;
     }
 }
