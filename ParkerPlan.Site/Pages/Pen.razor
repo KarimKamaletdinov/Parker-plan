@@ -1,0 +1,24 @@
+﻿@page "/pen/{Id:int}"
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+
+@{
+    _good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == Id);
+}
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <FieldRow FieldName="Наименование" FieldValue=@_good.Name></FieldRow>
+        <FieldRow FieldName="Цена" FieldValue=@_good.Price.ToString()></FieldRow>
+    </MudPaper>
+</MudContainer>
+
+@code
+{
+    [ParameterAttribute]
+    public int Id { get; set; }
+
+    private GoodDto _good;
+}

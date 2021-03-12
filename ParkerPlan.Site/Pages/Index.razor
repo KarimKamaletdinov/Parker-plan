@@ -1,0 +1,34 @@
+﻿@page "/"
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        @foreach (var good in GetGoods.Execute(new GetGoods()))
+        {
+            <MudItem>
+                @{ var url = $"/pen/{good.ParkerId}"; }
+                <MudLink Href=@url>
+                    <MudPaper Elevation="2" Class="pa-4">
+                        @{
+                            var name = good.Name;
+                            var image = $"pens/PEN{good.ParkerId}.bmp";
+                        }
+                        <img src=@image>
+                        <MudText Typo="Typo.h5" Align="Align.Center">
+                            @name
+                        </MudText>
+                        <MudText Align="Align.Center" Typo="Typo.h6">
+                            <MudChip Color="Color.Default">
+                                    @{ var price = $"{good.Price} руб."; }
+                                    @price
+                            </MudChip>
+                        </MudText>
+                    </MudPaper>
+                </MudLink>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
