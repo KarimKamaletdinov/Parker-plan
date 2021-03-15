@@ -2,6 +2,7 @@
 @using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Enums
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 
 @{
@@ -10,8 +11,52 @@
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudPaper Elevation="2" Class="pa-4">
+        <MudText Typo="Typo.h5">
+            @_good.Description
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        @{
+            var wnt = _good.WritingNodeType switch
+            {
+                WritingNodeType.Pen => "перьевой",
+                WritingNodeType.Roller => "роллер",
+                WritingNodeType.Round => "шариковый",
+                _ => ""
+            };
+
+            var d = _good.GoldDetails ? "золотые" : "серебряные";
+
+            var p = _good.GoldPen ? "золотое" : "серебряное";
+
+            var e = _good.AbleToEngraving ? "да" : "нет";
+
+            var m = _good.AbleForMan ? "да" : "нет";
+
+            var w = _good.AbleForWoman ? "да" : "нет";
+        }
+
         <FieldRow FieldName="Наименование" FieldValue=@_good.Name></FieldRow>
         <FieldRow FieldName="Цена" FieldValue=@_good.Price.ToString()></FieldRow>
+        <FieldRow FieldName="Коллекция" FieldValue=@_good.Collection></FieldRow>
+        <FieldRow FieldName="Код" FieldValue=@_good.ParkerId.ToString()></FieldRow>
+        <MudDivider />
+        <FieldRow FieldName="Тип пишущего узла" FieldValue="@wnt"> </FieldRow>
+        <FieldRow FieldName="Детали" FieldValue=@d></FieldRow>
+        <FieldRow FieldName="Перо" FieldValue=@p></FieldRow>
+        <FieldRow FieldName="Возможна гравировка" FieldValue=@e></FieldRow>
+        <MudDivider />
+        <FieldRow FieldName="Кол-во в Москве" FieldValue=@_good.InMsk.ToString()></FieldRow>
+        <FieldRow FieldName="Кол-во в Санкт-Петербурге" FieldValue=@_good.InSpb.ToString()></FieldRow>
+        <FieldRow FieldName="Кол-во в Уфе" FieldValue=@_good.InUfa.ToString()></FieldRow>
+        <FieldRow FieldName="Кол-во в Екптеринбурге" FieldValue=@_good.InEkt.ToString()></FieldRow>
+        <MudDivider />
+        <FieldRow FieldName="Подходит для мужчин" FieldValue=@m></FieldRow>
+        <FieldRow FieldName="Подходит для женщин" FieldValue=@w></FieldRow>
     </MudPaper>
 </MudContainer>
 
