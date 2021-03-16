@@ -1,0 +1,26 @@
+﻿@page "/pen/{id:int}/change/{password}"
+@using ParkerPlan.Site.Data
+@using System.Diagnostics.Eventing.Reader
+@inject PasswordService Service
+
+@if (Password == Service.GetPassword())
+{
+    <PenChangeComponent Id="@Id" />
+
+    
+}
+else
+{ 
+    <MudText Color="Color.Error" Align="Align.Center" Typo="Typo.h1">
+        Неправильный пароль!!!!!
+    </MudText>
+}
+
+@code
+{
+    [ParameterAttribute]
+    public int Id { get; set; }
+
+    [ParameterAttribute]
+    public string Password { get; set; }
+}

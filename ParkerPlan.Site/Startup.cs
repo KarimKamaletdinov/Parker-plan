@@ -9,6 +9,7 @@ using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Queries;
 using ParkerPlan.QueryHandlers;
 using ParkerPlan.Repositories;
+using ParkerPlan.Site.Data;
 
 namespace ParkerPlan.Site
 {
@@ -30,6 +31,7 @@ namespace ParkerPlan.Site
             services.AddMudServices();
             services.AddScoped<IQueryHandler<GetGoods, GoodDto[]>, GetGoodsQueryHandler>();
             services.AddScoped<SqlGoodRepository>();
+            services.AddScoped<PasswordService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

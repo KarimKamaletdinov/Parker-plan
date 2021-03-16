@@ -1,5 +1,4 @@
-﻿@page "/pen/{Id:int}"
-@using ParkerPlan.Abstractions.Queries
+﻿@using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Enums
@@ -42,7 +41,7 @@
                 WritingNodeType.Roller => "роллер",
                 WritingNodeType.Round => "шариковый",
                 _ => ""
-                };
+            };
 
             var d = _good.GoldDetails ? "золотые" : "серебряные";
 
@@ -84,12 +83,12 @@
 @{
     var link = $"/pen/{Id}/change/{Service.GetPassword()}";
 }
-<AdminDialog Visible="@_showDialog" CorrectPassword="@Service.GetPassword()" CloseMe="() => _showDialog = false" 
-             OkLink="@link"/>
+<AdminDialog Visible="@_showDialog" CorrectPassword="@Service.GetPassword()" CloseMe="() => _showDialog = false"
+             OkLink="@link" />
 
 @code
 {
-    [ParameterAttribute]
+    [Parameter]
     public int Id { get; set; }
 
     private GoodDto _good;

@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParkerPlan.Abstractions", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".app", ".app", "{D369328A-586A-480D-9C11-3CF97F181D18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkerPlan.Site", "ParkerPlan.Site\ParkerPlan.Site.csproj", "{F0C22DB2-1197-4ABA-A1E7-5D7500404B42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParkerPlan.Site", "ParkerPlan.Site\ParkerPlan.Site.csproj", "{F0C22DB2-1197-4ABA-A1E7-5D7500404B42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
