@@ -7,10 +7,6 @@
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject PasswordService Service
 
-@{
-    _good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == Id);
-}
-
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     @{
         var imgUrl = $"pens/PEN{_good.ParkerId}.bmp";
@@ -18,13 +14,13 @@
     <MudGrid>
         <MudItem Style="width: 50%">
             <MudPaper Elevation="2" Class="pa-4">
-                <img src=@imgUrl />
+                <img src="@imgUrl" />
             </MudPaper>
         </MudItem>
         <MudItem Style="width: 49%">
             <MudPaper Elevation="2" Class="pa-4">
                 <MudText Typo="Typo.h5" Align="Align.Left">
-                    @_good.Description
+                    <MudTextField Value="_good.Description"/>
                 </MudText>
             </MudPaper>
         </MudItem>
@@ -43,48 +39,61 @@
                 _ => ""
             };
 
+            var wntvals = new string[]
+            {
+                "перьевой",
+                "роллер",
+                "шариковый"
+            };
+
+
+            var dvals = new string[]
+            {
+                "золотые",
+                "серебряные"
+            };
             var d = _good.GoldDetails ? "золотые" : "серебряные";
 
+            var pvals = new string[]
+            {
+                "золотое",
+                "серебряное"
+            };
             var p = _good.GoldPen ? "золотое" : "серебряное";
-
-            var e = _good.AbleToEngraving ? "да" : "нет";
-
-            var m = _good.AbleForMan ? "да" : "нет";
-
-            var w = _good.AbleForWoman ? "да" : "нет";
         }
 
-        <FieldRow FieldName="Наименование" FieldValue=@_good.Name></FieldRow>
-        <FieldRow FieldName="Цена" FieldValue=@_good.Price.ToString()></FieldRow>
-        <FieldRow FieldName="Коллекция" FieldValue=@_good.Collection></FieldRow>
-        <FieldRow FieldName="Код" FieldValue=@_good.ParkerId.ToString()></FieldRow>
+        <ChangeStringField FieldName="Наименование" FieldValue="@_good.Name" Changed="@NameChanged"/>
+        <ChangeIntField FieldName="Цена" FieldValue="@_good.Price" Changed="@PriceChanged"/>
+        <ChangeStringField FieldName="Коллекция" FieldValue="@_good.Collection" Changed="@CollChanged"/>
+        <ReadonlyField FieldName="Код" FieldValue="@_good.ParkerId.ToString()"/>
         <MudDivider />
-        <FieldRow FieldName="Тип пишущего узла" FieldValue="@wnt"> </FieldRow>
-        <FieldRow FieldName="Детали" FieldValue=@d></FieldRow>
-        <FieldRow FieldName="Перо" FieldValue=@p></FieldRow>
-        <FieldRow FieldName="Возможна гравировка" FieldValue=@e></FieldRow>
+        <ChangeEnumField FieldName="Тип пишущего узла" FieldValue="@wnt" EnumValues=@wntvals 
+                         Changed="@VntChanged"/>
+        <ChangeEnumField FieldName="Детали" FieldValue="@d" EnumValues="@dvals" 
+                         Changed="@DetailsChanged"/>
+        <ChangeEnumField FieldName="Перо" FieldValue="@p" EnumValues="@pvals" Changed="@PenChanged"/>
+        <ChangeBoolField FieldName="Возможна гравировка" FieldValue="@_good.AbleToEngraving" 
+                         Changed="@EngChanged"/>
         <MudDivider />
-        <FieldRow FieldName="Кол-во в Москве" FieldValue=@_good.InMsk.ToString()></FieldRow>
-        <FieldRow FieldName="Кол-во в Санкт-Петербурге" FieldValue=@_good.InSpb.ToString()></FieldRow>
-        <FieldRow FieldName="Кол-во в Уфе" FieldValue=@_good.InUfa.ToString()></FieldRow>
-        <FieldRow FieldName="Кол-во в Екптеринбурге" FieldValue=@_good.InEkt.ToString()></FieldRow>
+        <ChangeIntField FieldName="Кол-во в Москве" FieldValue="@_good.InMsk" Changed="@MskChanged"/>
+        <ChangeIntField FieldName="Кол-во в Санкт-Петербурге" FieldValue="@_good.InSpb" 
+                        Changed="@SpbChanged"/>
+        <ChangeIntField FieldName="Кол-во в Уфе" FieldValue="@_good.InUfa" Changed="@UfaChanged"/>
+        <ChangeIntField FieldName="Кол-во в Екатеринбурге" FieldValue="@_good.InEkt" 
+                        Changed="@EktChanged"/>
         <MudDivider />
-        <FieldRow FieldName="Подходит для мужчин" FieldValue=@m></FieldRow>
-        <FieldRow FieldName="Подходит для женщин" FieldValue=@w></FieldRow>
+        <ChangeBoolField FieldName="Подходит для мужчин" FieldValue="@_good.AbleForMan"
+                         Changed="@FManChanged"/>
+        <ChangeBoolField FieldName="Подходит для женщин" FieldValue="@_good.AbleForWoman" 
+                         Changed="@FWomanChanged"/>
     </MudPaper>
 
     <MudPaper Elevation="2" Class="pa-4">
-        <MudButton OnClick="() => _showDialog = true">
-            Изменить
+        <MudButton OnClick="Save">
+            Coxранить
         </MudButton>
     </MudPaper>
 </MudContainer>
-
-@{
-    var link = $"/pen/{Id}/change/{Service.GetPassword()}";
-}
-<AdminDialog Visible="@_showDialog" CorrectPassword="@Service.GetPassword()" CloseMe="() => _showDialog = false"
-             OkLink="@link" />
 
 @code
 {
@@ -93,5 +102,84 @@
 
     private GoodDto _good;
 
-    private bool _showDialog;
+    protected override void OnInitialized()
+    {
+        _good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == Id);
+        base.OnInitialized();
+    }
+
+    private void NameChanged(object val)
+    {
+        _good.Name = val.ToString();
+    }
+
+    private void PriceChanged(int val)
+    {
+        _good.Price = val;
+    }
+
+    private void CollChanged(object val)
+    {
+        _good.Name = val.ToString();
+    }
+
+    private void VntChanged(object val)
+    {
+        _good.WritingNodeType = val switch
+        {
+            "перьевой" => WritingNodeType.Pen,
+            "роллер" => WritingNodeType.Roller,
+            "шариковый" => WritingNodeType.Round
+        };
+    }
+
+    private void DetailsChanged(object val)
+    {
+        _good.GoldDetails = "золотые" == val;
+    }
+
+    private void PenChanged(object val)
+    {
+        _good.GoldDetails = "золотое" == val;
+    }
+
+    private void MskChanged(int val)
+    {
+        _good.InMsk = val;
+    }
+
+    private void SpbChanged(int val)
+    {
+        _good.InSpb = val;
+    }
+
+    private void UfaChanged(int val)
+    {
+        _good.InUfa = val;
+    }
+
+    private void EktChanged(int val)
+    {
+        _good.InEkt = val;
+    }
+
+    private void EngChanged(object val)
+    {
+        _good.AbleToEngraving = bool.Parse(val.ToString());
+    }
+
+    private void FManChanged(object val)
+    {
+        _good.AbleForMan = bool.Parse(val.ToString());
+    }
+
+    private void FWomanChanged(object val)
+    {
+        _good.AbleForWoman = bool.Parse(val.ToString());
+    }
+
+    private void Save()
+    {
+
+    }
 }

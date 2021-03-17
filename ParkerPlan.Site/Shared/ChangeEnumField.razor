@@ -1,0 +1,27 @@
+﻿<div style="margin: 5px 0 0 0">
+    <div style="width: 50%; display: inline-block">
+        <MudText Align="Align.Left" Typo="Typo.h6">
+            @FieldName
+        </MudText>
+    </div>
+    <div style="width: 49%; display: inline-block">
+        <MudSelect T="string" Value="FieldValue" ValueChanged="Changed">
+            @foreach (var value in EnumValues)
+            {
+                <MudSelectItem Value="value"/>
+            }
+        </MudSelect>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string FieldName { get; set; }
+    [Parameter]
+    public string FieldValue { get; set; }
+    [Parameter]
+    public string[] EnumValues { get; set; }
+    [Parameter]
+    public EventCallback<string> Changed { get; set; }
+
+}
