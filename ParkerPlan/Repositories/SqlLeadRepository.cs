@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Enums;
 using ParkerPlan.Models;
 
@@ -46,6 +48,17 @@ namespace ParkerPlan.Repositories
                 pay_method = lead.PayMethod,
                 comment = lead.Comment
             });
+
+            foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
+                "SELECT * FROM LeadPenRels").Where(x => x.lead_id == lead.Id))
+            {
+                new SqlConnection(_connectionString).Delete(dto);
+            }
+
+            foreach (var good in lead.Goods)
+            {
+                new SqlConnection(_connectionString).Insert(good);
+            }
         }
 
         public void Update(Lead lead)
@@ -69,16 +82,33 @@ namespace ParkerPlan.Repositories
                 pay_method = lead.PayMethod,
                 comment = lead.Comment
             });
+
+            foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
+                "SELECT * FROM LeadPenRels").Where(x => x.lead_id == lead.Id))
+            {
+                new SqlConnection(_connectionString).Delete(dto);
+            }
+
+            foreach (var good in lead.Goods)
+            {
+                new SqlConnection(_connectionString).Insert(good);
+            }
         }
 
         public void Delete(int id)
         {
             new SqlConnection(_connectionString).Delete(new SqlLeadDto() { id = id });
+
+            foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
+                "SELECT * FROM LeadPenRels").Where(x => x.lead_id == id))
+            {
+                new SqlConnection(_connectionString).Delete(dto);
+            }
         }
 
         public Lead[] GetAll()
         {
-            var a = new SqlConnection(_connectionString).Query<SqlLeadDto>("SELECT * FROM Pens");
+            var a = new SqlConnection(_connectionString).Query<SqlLeadDto>("SELECT * FROM Leads");
 
             var result = new List<Lead>();
 
@@ -97,9 +127,13 @@ namespace ParkerPlan.Repositories
                     Agreed = lead.agreed,
                     Payed = lead.payed,
                     Delivered = lead.delivered,
-                    PenIds = new int[]
+                    Goods = new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>("Select * FROM" +
+                        "LeadPenRels").Where(x => x.lead_id == lead.id).Select(x => new GoodLeadDto()
                     {
-                    },
+                            GoodId = x.good_id,
+                            Engraving = x.engraving,
+                            Count = x.count
+                    }).ToArray(),
                     CreatingDate = lead.creating_date,
                     DeliveryDate = lead.delivery_date,
                     DeliveryMethod = lead.delivery_method,
@@ -132,6 +166,16 @@ namespace ParkerPlan.Repositories
             public DeliveryMethod delivery_method { get; set; }
             public PayMethod pay_method { get; set; }
             public string comment { get; set; }
+        }
+
+        [Table("GoodLeadRel")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private class SqlGoodLeadRelDto
+        {
+            public int lead_id { get; set; }
+            public int good_id { get; set; }
+            public string engraving { get; set; }
+            public int count { get; set; }
         }
     }
 }

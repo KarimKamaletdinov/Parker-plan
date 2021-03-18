@@ -1,22 +1,21 @@
 ﻿using ParkerPlan.Abstractions;
 using ParkerPlan.Abstractions.Commands.Lead;
-using ParkerPlan.Abstractions.Enums;
 using ParkerPlan.Repositories;
 
 namespace ParkerPlan.CommandHandlers.Lead
 {
-    public class InsertLeadCommandHandler : ICommandHandler<InsertLead>
+    public class UpdateLeadCommandHandler : ICommandHandler<UpdateLead>
     {
         private SqlLeadRepository _repository;
 
-        public InsertLeadCommandHandler(SqlLeadRepository repository)
+        public UpdateLeadCommandHandler(SqlLeadRepository repository)
         {
             _repository = repository;
         }
 
-        public void Execute(InsertLead command)
+        public void Execute(UpdateLead command)
         {
-            _repository.Insert(new Models.Lead
+            _repository.Update(new Models.Lead
             {
                 Id = command.Lead.Id,
                 CustomerName = command.Lead.CustomerName,

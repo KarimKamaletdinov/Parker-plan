@@ -1,0 +1,56 @@
+﻿<MudDialog IsVisible="Visible">
+    <DialogContent>
+        <MudText Typo="Typo.h4">
+            Введите пароль
+        </MudText>
+        <MudDivider/>
+        @{
+            var helperText = _pwdCorrect ? "Пароль верный" : "Неправильный пароль";
+        }
+        <MudTextField @bind-Value="@_wrtnPwd" HelperText="@helperText" />
+    </DialogContent>
+    
+    <DialogActions>
+        <a href="@OkLink">
+            <MudButton Disabled="!_pwdCorrect" Link="@this.OkLink">
+                OK
+            </MudButton>
+        </a>
+        <MudButton OnClick="CloseMe">
+            Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public string CorrectPassword { get; set; }
+
+    [Parameter]
+    public string OkLink { get; set; }
+
+    [Parameter]
+    public EventCallback CloseMe { get; set; } = new();
+
+    private bool _pwdCorrect;
+    private string _wrtnPwd1 = "";
+
+    private string _wrtnPwd
+    {
+        get => _wrtnPwd1;
+        set
+        {
+            _wrtnPwd1 = value;
+
+            WrittenPwdChanged();
+        }
+    }
+
+    private void WrittenPwdChanged()
+    {
+        _pwdCorrect = CorrectPassword == _wrtnPwd;
+    }
+}

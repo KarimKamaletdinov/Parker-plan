@@ -1,0 +1,21 @@
+﻿<div style="margin: 5px 0 0 0">
+    <div style="width: 50%; display: inline-block">
+        <MudText Align="Align.Left" Typo="Typo.h6">
+            @FieldName
+        </MudText>
+    </div>
+    <div style="width: 49%; display: inline-block">
+        <MudTextField Value="FieldValue" Typo="Typo.h6" ValueChanged="Changed">
+            @FieldValue
+        </MudTextField>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string FieldName { get; set; }
+    [Parameter]
+    public int FieldValue { get; set; }
+    [Parameter]
+    public EventCallback<int> Changed { get; set; }
+}

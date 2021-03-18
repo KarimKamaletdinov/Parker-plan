@@ -1,0 +1,31 @@
+﻿<MudDialog IsVisible="@Visible">
+    <DialogContent>
+        <MudText Typo="Typo.h4">@Header</MudText>
+        <MudTextField T="int" Typo="Typo.h6" ValueChanged="Changed"/>
+    </DialogContent>
+    <DialogActions>
+        @{
+            var icon = Icons.Material.Rounded.Check;
+        }
+        <MudButton StartIcon="@icon" OnClick="() => { Visible = false; this.Ok.InvokeAsync(_value); }">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public string Header { get; set; }
+
+    private int _value;
+
+    [Parameter]
+    public EventCallback<int> Ok { get; set; }
+
+    public void Changed(int value)
+    {
+        _value = value;
+    }
+}
