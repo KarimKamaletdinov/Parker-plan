@@ -1,8 +1,13 @@
 ﻿@page "/"
+@page "/admin/{password}"
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Site.Data
+@using System.Diagnostics.Eventing.Reader
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject PasswordService PasswordService
+@inject ISnackbar Snackbar
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
@@ -22,8 +27,8 @@
                         </MudText>
                         <MudText Align="Align.Center" Typo="Typo.h6">
                             <MudChip Color="Color.Default">
-                                    @{ var price = $"{good.Price} руб."; }
-                                    @price
+                                @{ var price = $"{good.Price} руб."; }
+                                @price
                             </MudChip>
                         </MudText>
                     </MudPaper>
@@ -32,3 +37,43 @@
         }
     </MudGrid>
 </MudContainer>
+
+@if (Password != null)
+{
+    @if (Password == PasswordService.GetPassword())
+    {
+        <MudContainer>
+            <MudPaper>
+                @{
+                    var icon = Icons.Material.Rounded.Add;
+                }
+                <MudButton StartIcon="@icon" OnClick="AddPen">Добавить </MudButton>
+            </MudPaper>
+        </MudContainer>
+    }
+    else
+    {
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        Snackbar.Add("Неверный пароль!", Severity.Error);
+    }
+}
+
+<AskIntDialog Visible="@_showDialog" Header="Введите код ручки. Его нельзя будет изменить потом." Ok="@Ok"/>
+
+@code
+{
+    [ParameterAttribute]
+    public string Password { get; set; } = null;
+
+    private bool _showDialog = false;
+
+    private void AddPen()
+    {
+        _showDialog = true;
+    }
+
+    private void Ok()
+    {
+
+    }
+}
