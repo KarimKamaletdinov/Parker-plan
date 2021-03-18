@@ -5,7 +5,7 @@
         </MudText>
     </div>
     <div style="width: 49%; display: inline-block">
-        <MudSelect T="string" Value="FieldValue" ValueChanged="Changed">
+        <MudSelect T="string" Value="FieldValue" ValueChanged="Changed" OffsetY="true">
             @foreach (var value in EnumValues)
             {
                 <MudSelectItem Value="value"/>
