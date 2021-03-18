@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
 using ParkerPlan.Abstractions;
+using ParkerPlan.Abstractions.Commands.Good;
 using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Queries;
+using ParkerPlan.CommandHandlers.Good;
 using ParkerPlan.QueryHandlers;
 using ParkerPlan.Repositories;
 using ParkerPlan.Site.Data;
@@ -30,6 +32,7 @@ namespace ParkerPlan.Site
             services.AddServerSideBlazor();
             services.AddMudServices();
             services.AddScoped<IQueryHandler<GetGoods, GoodDto[]>, GetGoodsQueryHandler>();
+            services.AddScoped<ICommandHandler<UpdateGood>, UpdateGoodCommandHandler>();
             services.AddScoped<SqlGoodRepository>();
             services.AddScoped<PasswordService>();
         }
