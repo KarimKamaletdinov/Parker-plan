@@ -34,6 +34,7 @@ namespace ParkerPlan.Site
             services.AddScoped<IQueryHandler<GetGoods, GoodDto[]>, GetGoodsQueryHandler>();
             services.AddScoped<ICommandHandler<UpdateGood>, UpdateGoodCommandHandler>();
             services.AddScoped<ICommandHandler<InsertGood>, InsertGoodCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteGood>, DeleteGoodCommandHandler>();
             services.AddScoped<SqlGoodRepository>();
             services.AddScoped<PasswordService>();
         }

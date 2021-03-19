@@ -28,7 +28,7 @@ namespace ParkerPlan.Repositories
         {
             new SqlConnection(_connectionString).Insert(new SqlGoodDto
             {
-                parker_id = 11,
+                parker_id = good.ParkerId,
                 name = good.Name,
                 collection = good.Collection,
                 able_for_man = good.AbleForMan,
@@ -111,6 +111,7 @@ namespace ParkerPlan.Repositories
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private class SqlGoodDto
         {
+            [ExplicitKey]
             public int parker_id { get; set; }
             public string name { get; set; }
             public string collection { get; set; }

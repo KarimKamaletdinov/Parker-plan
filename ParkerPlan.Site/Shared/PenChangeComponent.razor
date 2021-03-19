@@ -6,7 +6,8 @@
 @using ParkerPlan.Abstractions.Commands.Good
 @using ParkerPlan.Site.Data
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
-@inject ICommandHandler<UpdateGood> UpdateGood;
+@inject ICommandHandler<UpdateGood> UpdateGood
+@inject ICommandHandler<DeleteGood> DeleteGood
 @inject PasswordService Service
 @inject ISnackbar Snackbar
 
@@ -23,7 +24,7 @@
         <MudItem Style="width: 49%">
             <MudPaper Elevation="2" Class="pa-4">
                 <MudText Typo="Typo.h5" Align="Align.Left">
-                    <MudTextField Value="_good.Description"/>
+                    <MudTextField Value="_good.Description" />
                 </MudText>
             </MudPaper>
         </MudItem>
@@ -40,68 +41,90 @@
                 WritingNodeType.Roller => "роллер",
                 WritingNodeType.Round => "шариковый",
                 _ => ""
-                };
+            };
 
             var wntvals = new string[]
             {
                 "перьевой",
                 "роллер",
                 "шариковый"
-            };
+                                            };
 
 
             var dvals = new string[]
             {
                 "золотые",
                 "серебряные"
-            };
+                                            };
             var d = _good.GoldDetails ? "золотые" : "серебряные";
 
             var pvals = new string[]
             {
                 "золотое",
                 "серебряное"
-            };
+                                            };
             var p = _good.GoldPen ? "золотое" : "серебряное";
         }
 
-        <ChangeStringField FieldName="Наименование" FieldValue="@_good.Name" Changed="@NameChanged"/>
-        <ChangeIntField FieldName="Цена" FieldValue="@_good.Price" Changed="@PriceChanged"/>
-        <ChangeStringField FieldName="Коллекция" FieldValue="@_good.Collection" Changed="@CollChanged"/>
-        <ReadonlyField FieldName="Код" FieldValue="@_good.ParkerId.ToString()"/>
+        <ChangeStringField FieldName="Наименование" FieldValue="@_good.Name" Changed="@NameChanged" />
+        <ChangeIntField FieldName="Цена" FieldValue="@_good.Price" Changed="@PriceChanged" />
+        <ChangeStringField FieldName="Коллекция" FieldValue="@_good.Collection" Changed="@CollChanged" />
+        <ReadonlyField FieldName="Код" FieldValue="@_good.ParkerId.ToString()" />
         <MudDivider />
-        <ChangeEnumField FieldName="Тип пишущего узла" FieldValue="@wnt" EnumValues=@wntvals 
-                         Changed="@VntChanged"/>
-        <ChangeEnumField FieldName="Детали" FieldValue="@d" EnumValues="@dvals" 
-                         Changed="@DetailsChanged"/>
-        <ChangeEnumField FieldName="Перо" FieldValue="@p" EnumValues="@pvals" Changed="@PenChanged"/>
-        <ChangeBoolField FieldName="Возможна гравировка" FieldValue="@_good.AbleToEngraving" 
-                         Changed="@EngChanged"/>
+        <ChangeEnumField FieldName="Тип пишущего узла" FieldValue="@wnt" EnumValues=@wntvals
+                         Changed="@VntChanged" />
+        <ChangeEnumField FieldName="Детали" FieldValue="@d" EnumValues="@dvals"
+                         Changed="@DetailsChanged" />
+        <ChangeEnumField FieldName="Перо" FieldValue="@p" EnumValues="@pvals" Changed="@PenChanged" />
+        <ChangeBoolField FieldName="Возможна гравировка" FieldValue="@_good.AbleToEngraving"
+                         Changed="@EngChanged" />
         <MudDivider />
-        <ChangeIntField FieldName="Кол-во в Москве" FieldValue="@_good.InMsk" Changed="@MskChanged"/>
-        <ChangeIntField FieldName="Кол-во в Санкт-Петербурге" FieldValue="@_good.InSpb" 
-                        Changed="@SpbChanged"/>
-        <ChangeIntField FieldName="Кол-во в Уфе" FieldValue="@_good.InUfa" Changed="@UfaChanged"/>
-        <ChangeIntField FieldName="Кол-во в Екатеринбурге" FieldValue="@_good.InEkt" 
-                        Changed="@EktChanged"/>
+        <ChangeIntField FieldName="Кол-во в Москве" FieldValue="@_good.InMsk" Changed="@MskChanged" />
+        <ChangeIntField FieldName="Кол-во в Санкт-Петербурге" FieldValue="@_good.InSpb"
+                        Changed="@SpbChanged" />
+        <ChangeIntField FieldName="Кол-во в Уфе" FieldValue="@_good.InUfa" Changed="@UfaChanged" />
+        <ChangeIntField FieldName="Кол-во в Екатеринбурге" FieldValue="@_good.InEkt"
+                        Changed="@EktChanged" />
         <MudDivider />
         <ChangeBoolField FieldName="Подходит для мужчин" FieldValue="@_good.AbleForMan"
-                         Changed="@FManChanged"/>
-        <ChangeBoolField FieldName="Подходит для женщин" FieldValue="@_good.AbleForWoman" 
-                         Changed="@FWomanChanged"/>
+                         Changed="@FManChanged" />
+        <ChangeBoolField FieldName="Подходит для женщин" FieldValue="@_good.AbleForWoman"
+                         Changed="@FWomanChanged" />
     </MudPaper>
+    @{
+        var link = $"/admin/{Service.GetPassword()}";
 
+        var saveIcon = Icons.Material.Rounded.Save;
+
+        var deleteIcon = Icons.Material.Rounded.Delete;
+
+        var backIcon = Icons.Material.Rounded.FirstPage;
+    }
     <MudPaper Elevation="2" Class="pa-4">
-        <MudButton OnClick="Save">
-            Coxранить
-        </MudButton>
-        @{
-            var url = $"pen/{Id}/";
-        }
-        <MudButton Link="@url">
-            Назад
-        </MudButton>
+        <div style="display: inline-block; width: 30%">
+            <MudText Align="Align.Left">
+                <MudButton OnClick="Save" Color="Color.Info" StartIcon="@saveIcon">
+                    Coxранить
+                </MudButton>
+            </MudText>
+        </div>
+        <div style="display: inline-block; width: 30%">
+            <MudText Align="Align.Center">
+                <MudButton OnClick="() => { _showDialog = true; }" Color="Color.Error" StartIcon="@deleteIcon">
+                    Удалить
+                </MudButton>
+            </MudText>
+        </div>
+
+        <div style="display: inline-block; width: 29%">
+            <MudText Align="Align.Right">
+                <MudButton Link="@link" StartIcon="@backIcon">
+                    Назад
+                </MudButton>
+            </MudText>
+        </div>
     </MudPaper>
+    <YesNoDialog Ok="@DeletePen" Text="Удалить товар?" Visible="@_showDialog" OkLink="@link" />
 </MudContainer>
 
 @code
@@ -110,6 +133,14 @@
     public int Id { get; set; }
 
     private GoodDto _good;
+
+    private bool _showDialog = false;
+
+    private void DeletePen()
+    {
+        _showDialog = false;
+        DeleteGood.Execute(new DeleteGood { GoodId = Id });
+    }
 
     protected override void OnInitialized()
     {
@@ -189,7 +220,7 @@
 
     private void Save()
     {
-        UpdateGood.Execute(new UpdateGood{Good = _good});
+        UpdateGood.Execute(new UpdateGood { Good = _good });
 
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
         Snackbar.Add("Данные сохранены!", Severity.Info);

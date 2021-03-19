@@ -17,7 +17,14 @@
         @foreach (var good in GetGoods.Execute(new GetGoods()))
         {
             <MudItem>
-                @{ var url = $"/pen/{good.ParkerId}"; }
+                @{
+                    var url = $"/pen/{good.ParkerId}";
+
+                    if (Password != null)
+                    {
+                        url = $"/pen/{good.ParkerId}/change/{Password}";
+                    }
+                }
                 <MudLink Href=@url>
                     <MudPaper Elevation="2" Class="pa-4">
                         @{
