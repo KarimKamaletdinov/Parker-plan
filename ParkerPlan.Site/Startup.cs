@@ -33,6 +33,7 @@ namespace ParkerPlan.Site
             services.AddMudServices();
             services.AddScoped<IQueryHandler<GetGoods, GoodDto[]>, GetGoodsQueryHandler>();
             services.AddScoped<ICommandHandler<UpdateGood>, UpdateGoodCommandHandler>();
+            services.AddScoped<ICommandHandler<InsertGood>, InsertGoodCommandHandler>();
             services.AddScoped<SqlGoodRepository>();
             services.AddScoped<PasswordService>();
         }

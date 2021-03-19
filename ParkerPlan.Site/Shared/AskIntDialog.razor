@@ -5,9 +5,14 @@
     </DialogContent>
     <DialogActions>
         @{
-            var icon = Icons.Material.Rounded.Check;
+            var okIcon = Icons.Material.Rounded.Check;
+            var cancelIcon = Icons.Material.Rounded.Cancel;
         }
-        <MudButton StartIcon="@icon" OnClick="() => { Visible = false; this.Ok.InvokeAsync(_value); }">Ok</MudButton>
+        <MudButton StartIcon="@okIcon"
+                   OnClick="() => { this.Visible = false;this.Ok.InvokeAsync(this._value); }">
+            Ok
+        </MudButton>
+        <MudButton StartIcon="@cancelIcon" OnClick="() => { Visible = false; }">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
 
