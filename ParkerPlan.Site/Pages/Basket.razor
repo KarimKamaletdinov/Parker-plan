@@ -1,0 +1,13 @@
+﻿@page "/basket/"
+@using ParkerPlan.QueryHandlers
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Dtos
+@inject IQueryHandler<GetCostumers, CostumerDto[]> Get
+
+@{
+    var up = Get.Execute(new GetCostumers()).Select(x => (x.Name, x.Password, x.Id))
+        .ToArray();
+}
+
+<CostumerDialog UserPasswords="@up", Visible="@true" CloseMe="() => {}"/>

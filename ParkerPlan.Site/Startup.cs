@@ -5,10 +5,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
 using ParkerPlan.Abstractions;
+using ParkerPlan.Abstractions.Commands.Costumer;
 using ParkerPlan.Abstractions.Commands.Good;
+using ParkerPlan.Abstractions.Commands.Lead;
 using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Queries;
+using ParkerPlan.CommandHandlers.Costumer;
 using ParkerPlan.CommandHandlers.Good;
+using ParkerPlan.CommandHandlers.Lead;
 using ParkerPlan.QueryHandlers;
 using ParkerPlan.Repositories;
 using ParkerPlan.Site.Data;
@@ -36,6 +40,16 @@ namespace ParkerPlan.Site
             services.AddScoped<ICommandHandler<InsertGood>, InsertGoodCommandHandler>();
             services.AddScoped<ICommandHandler<DeleteGood>, DeleteGoodCommandHandler>();
             services.AddScoped<SqlGoodRepository>();
+            services.AddScoped<IQueryHandler<GetCostumers, CostumerDto[]>, GetCostumersQueryHandler>();
+            services.AddScoped<ICommandHandler<UpdateCostumer>, UpdateCostumerCommandHandler>();
+            services.AddScoped<ICommandHandler<InsertCostumer>, InsertCostumerCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteCostumer>, DeleteCostumerCommandHandler>();
+            services.AddScoped<SqlCostumerRepository>();
+            services.AddScoped<IQueryHandler<GetLeads, LeadDto[]>, GetLeadsQueryHandler>();
+            services.AddScoped<ICommandHandler<UpdateLead>, UpdateLeadCommandHandler>();
+            services.AddScoped<ICommandHandler<InsertLead>, InsertLeadCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteLead>, DeleteLeadCommandHandler>();
+            services.AddScoped<SqlLeadRepository>();
             services.AddScoped<PasswordService>();
         }
 
