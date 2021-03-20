@@ -33,7 +33,8 @@ namespace ParkerPlan.CommandHandlers.Lead
                 DeliveryDate = command.Lead.DeliveryDate,
                 DeliveryMethod = command.Lead.DeliveryMethod,
                 PayMethod = command.Lead.PayMethod,
-                Comment = command.Lead.Comment
+                Comment = command.Lead.Comment,
+                CostumerId = command.Lead.CostumerId
             });
         }
     }

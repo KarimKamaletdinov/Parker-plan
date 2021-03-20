@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using ParkerPlan.Abstractions;
-using ParkerPlan.Abstractions.Commands.Lead;
 using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Queries;
 using ParkerPlan.Repositories;
 
-namespace ParkerPlan.CommandHandlers.Lead
+namespace ParkerPlan.QueryHandlers
 {
     public class GetLeadsQueryHandler : IQueryHandler<GetLeads, LeadDto[]>
     {
@@ -36,7 +35,8 @@ namespace ParkerPlan.CommandHandlers.Lead
                 DeliveryDate = x.DeliveryDate,
                 DeliveryMethod = x.DeliveryMethod,
                 PayMethod = x.PayMethod,
-                Comment = x.Comment
+                Comment = x.Comment,
+                CostumerId = x.CostumerId
             }).ToArray();
         }
     }

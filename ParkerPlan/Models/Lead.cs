@@ -24,5 +24,6 @@ namespace ParkerPlan.Models
         public PayMethod PayMethod { get; set; }
         public string Comment { get; set; }
         public int? FullPrice => 0;
+        public int? CostumerId { get; set; }
     }
 }

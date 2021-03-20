@@ -5,7 +5,7 @@
         </MudText>
     </div>
     <div style="width: 49%; display: inline-block">
-        <MudTextField Value="FieldValue" ReadOnly="true"/>
+        <MudSwitch Checked="@FieldValue" Color="Color.Primary" CheckedChanged="Changed" />
     </div>
 </div>
 
@@ -13,5 +13,7 @@
     [Parameter]
     public string FieldName { get; set; }
     [Parameter]
-    public string FieldValue { get; set; }
+    public bool FieldValue { get; set; }
+    [Parameter]
+    public EventCallback<bool> Changed { get; set; }
 }

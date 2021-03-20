@@ -5,7 +5,10 @@
 @using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Site.Data
 @using System.Diagnostics.Eventing.Reader
+@using ParkerPlan.Abstractions.Commands.Good
+@using ParkerPlan.Abstractions.Enums
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject ICommandHandler<InsertGood> InsertGood
 @inject PasswordService PasswordService
 @inject ISnackbar Snackbar
 
@@ -14,7 +17,14 @@
         @foreach (var good in GetGoods.Execute(new GetGoods()))
         {
             <MudItem>
-                @{ var url = $"/pen/{good.ParkerId}"; }
+                @{
+                    var url = $"/pen/{good.ParkerId}";
+
+                    if (Password != null)
+                    {
+                        url = $"/pen/{good.ParkerId}/change/{Password}";
+                    }
+                }
                 <MudLink Href=@url>
                     <MudPaper Elevation="2" Class="pa-4">
                         @{
@@ -72,8 +82,31 @@
         _showDialog = true;
     }
 
-    private void Ok()
+    private void Ok(int value)
     {
+        _showDialog = false;
 
+        InsertGood.Execute(new InsertGood()
+        {
+            Good = new GoodDto
+            {
+                ParkerId = value, 
+                Name = "", 
+                Collection = "",
+                AbleForMan = false, 
+                AbleForWoman = false,
+                GoldDetails = false,
+                GoldPen = false,
+                WritingNodeType = WritingNodeType.Round, 
+                Price = 0, 
+                AbleToEngraving = false, 
+                Description = null, 
+                InSpb = 0,
+                InMsk = 0, 
+                InUfa = 0, 
+                InEkt = 0, 
+                SelfPrice = 0
+            }
+        });
     }
 }
