@@ -3,12 +3,17 @@
         <MudText Typo="Typo.h4">@Text</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="() => { Visible = false; Ok.InvokeAsync(); }" Link="@OkLink">OK</MudButton>
-        <MudButton OnClick="() => { Visible = false; }">Ok</MudButton>
+        <MudButton OnClick="() => { Visible = false;Ok.InvokeAsync(); }" Link="@OkLink" 
+                   Color="Color.Success">
+            OK
+        </MudButton>
+        <MudButton OnClick="() => { Visible = false; }" Color="Color.Warning">
+            Cancel
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
-@code 
+@code
 {
     [Parameter]
     public bool Visible { get; set; }

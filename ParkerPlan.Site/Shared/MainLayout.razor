@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using ParkerPlan.Site.Data
+@inherits LayoutComponentBase
+@inject PasswordService PasswordService
 
 
 <MudThemeProvider/>
@@ -11,9 +13,10 @@
         <MudAppBarSpacer />
         @{
             var icon = Icons.Material.Filled.House;
+            var adminIcon = Icons.Material.Filled.Settings;
         }
-        <MudIconButton Icon="@icon" Color="Color.Inherit" 
-                       Link="/"/>
+        <MudIconButton Icon="@icon" Color="Color.Inherit" Link="/"/>
+        <MudIconButton Icon="@adminIcon" Color="Color.Inherit" OnClick="() => { _showDialog = true; }"/>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
@@ -26,8 +29,17 @@
     </MudMainContent>
 </MudLayout>
 
+@{
+    var link = $"/admin/{PasswordService.GetPassword()}";
+}
+
+<AdminDialog CorrectPassword="@PasswordService.GetPassword()" Visible="_showDialog" 
+             CloseMe="() => { _showDialog = false; }" OkLink="@link"/>
+
 @code {
     bool _drawerOpen = true;
+
+    private bool _showDialog = false;
 
     void DrawerToggle()
     {

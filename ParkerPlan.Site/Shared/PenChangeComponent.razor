@@ -2,7 +2,6 @@
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Enums
-@using Microsoft.AspNetCore.Http
 @using ParkerPlan.Abstractions.Commands.Good
 @using ParkerPlan.Site.Data
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
@@ -91,15 +90,17 @@
         <ChangeBoolField FieldName="Подходит для женщин" FieldValue="@_good.AbleForWoman"
                          Changed="@FWomanChanged" />
     </MudPaper>
-    @{
-        var link = $"/admin/{Service.GetPassword()}";
+</MudContainer>
+@{
+    var link = $"/admin/{Service.GetPassword()}";
 
-        var saveIcon = Icons.Material.Rounded.Save;
+    var saveIcon = Icons.Material.Rounded.Save;
 
-        var deleteIcon = Icons.Material.Rounded.Delete;
+    var deleteIcon = Icons.Material.Rounded.Delete;
 
-        var backIcon = Icons.Material.Rounded.FirstPage;
-    }
+    var backIcon = Icons.Material.Rounded.House;
+}
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudPaper Elevation="2" Class="pa-4">
         <div style="display: inline-block; width: 30%">
             <MudText Align="Align.Left">
@@ -124,8 +125,10 @@
             </MudText>
         </div>
     </MudPaper>
-    <YesNoDialog Ok="@DeletePen" Text="Удалить товар?" Visible="@_showDialog" OkLink="@link" />
 </MudContainer>
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+</MudContainer>
+<YesNoDialog Ok="@DeletePen" Text="Удалить товар?" Visible="@_showDialog" OkLink="@link" />
 
 @code
 {
