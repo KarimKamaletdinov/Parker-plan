@@ -10,4 +10,11 @@
         .ToArray();
 }
 
-<CostumerDialog UserPasswords="@up", Visible="@true" CloseMe="() => {}"/>
+<MudButton OnClick="() => { _showDialog = true; }">eee</MudButton>
+
+<CostumerDialog UserPasswords="@up" Visible="@_showDialog" CloseMe="() => { _showDialog = false; }"/>
+
+@code
+{
+    private bool _showDialog = false;
+}

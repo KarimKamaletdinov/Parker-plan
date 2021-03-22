@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,6 +54,7 @@ namespace ParkerPlan.Site
             services.AddScoped<ICommandHandler<DeleteLead>, DeleteLeadCommandHandler>();
             services.AddScoped<SqlLeadRepository>();
             services.AddScoped<PasswordService>();
+            services.AddScoped<CustomAuthStateProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,14 +73,30 @@ namespace ParkerPlan.Site
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+        }
+    }
+
+
+    public class CustomAuthStateProvider
+    {
+        public Task<AuthenticationState> GetAuthenticationStateAsync(string name, string password)
+        {
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Surname, password)
+            }, "Fake authentication type");
+
+            var user = new ClaimsPrincipal(identity);
+
+            return Task.FromResult(new AuthenticationState(user));
         }
     }
 }

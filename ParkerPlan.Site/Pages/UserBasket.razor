@@ -1,0 +1,17 @@
+﻿@page "/basket/{Id:int}/{Password}"
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
+@inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
+
+
+
+@code
+{
+    [ParameterAttribute]
+    public int Id { get; set; }
+
+    [ParameterAttribute]
+    public string Password { get; set; }
+}

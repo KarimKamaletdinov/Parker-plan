@@ -8,7 +8,7 @@
             var helperText = _pwdCorrect ? "Пароль верный" : "Неправильный пароль";
         }
         <MudText>Введите имя пользователя</MudText>
-        <MudTextField @bind-Value="@_wrtnPwd" HelperText="@helperText" />
+        <MudTextField @bind-Value="@_wrtnName" />
         <MudText>Введите пароль</MudText>
         <MudTextField @bind-Value="@_wrtnPwd" HelperText="@helperText" />
     </DialogContent>
