@@ -3,18 +3,49 @@
 @using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Dtos
-@inject IQueryHandler<GetCostumers, CostumerDto[]> Get
+@using Newtonsoft.Json
+@using ParkerPlan.Abstractions.Enums
+@inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject IJSRuntime Js
 
 @{
-    var up = Get.Execute(new GetCostumers()).Select(x => (x.Name, x.Password, x.Id))
-        .ToArray();
+    Goods = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
 }
 
-<MudButton OnClick="() => { _showDialog = true; }">eee</MudButton>
+<MudTable Items="@Goods">
+    <HeaderContent>
+        <MudTh>Nr</MudTh>
+        <MudTh>Sign</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nr">@context.GoodId</MudTd>
+        <MudTd DataLabel="Sign">@context.Count</MudTd>
+    </RowTemplate>
+</MudTable>
 
-<CostumerDialog UserPasswords="@up" Visible="@_showDialog" CloseMe="() => { _showDialog = false; }"/>
+
 
 @code
 {
-    private bool _showDialog = false;
+    private string JsonBasket { get; set; }
+
+    private GoodLeadDto[] Goods;
+
+    protected async Task WriteCookies(string value)
+    {
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", value,
+     DateTime.Now.AddMinutes(1));
+    }
+    protected async Task ReadCookies()
+    {
+        JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ReadCookies();
+    }
 }
