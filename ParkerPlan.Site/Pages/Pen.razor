@@ -4,14 +4,16 @@
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Enums
 @using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json
 @using ParkerPlan.Site.Data
+@inject IJSRuntime Js
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject PasswordService Service
+@inject IHttpContextAccessor Http
 
 @{
     _good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == Id);
 }
-
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     @{
         var imgUrl = $"pens/PEN{_good.ParkerId}.bmp";
@@ -27,6 +29,8 @@
                 <MudText Typo="Typo.h5" Align="Align.Left">
                     @_good.Description
                 </MudText>
+                <MudButton OnClick="AddToBasket">Добавить в корзину</MudButton>
+                <MudButton OnClick="DeleteFromBasket">Удалить из корзины</MudButton>
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -42,7 +46,7 @@
                 WritingNodeType.Roller => "роллер",
                 WritingNodeType.Round => "шариковый",
                 _ => ""
-                };
+            };
 
             var d = _good.GoldDetails ? "золотые" : "серебряные";
 
@@ -75,17 +79,17 @@
     </MudPaper>
 
     @*<MudPaper Elevation="2" Class="pa-4">
-        <MudButton OnClick="() => _showDialog = true">
-            Изменить
-        </MudButton>
-    </MudPaper>*@
+            <MudButton OnClick="() => _showDialog = true">
+                Изменить
+            </MudButton>
+        </MudPaper>*@
 </MudContainer>
 
 @{
     var link = $"/pen/{Id}/change/{Service.GetPassword()}";
 }
-<AdminDialog Visible="@_showDialog" CorrectPassword="@Service.GetPassword()" CloseMe="() => _showDialog = false" 
-             OkLink="@link"/>
+<AdminDialog Visible="@_showDialog" CorrectPassword="@Service.GetPassword()" CloseMe="() => _showDialog = false"
+             OkLink="@link" />
 
 @code
 {
@@ -95,4 +99,48 @@
     private GoodDto _good;
 
     private bool _showDialog;
+
+    private async Task AddToBasket()
+    {
+        var basketStr = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+
+        var basket = JsonConvert.DeserializeObject<List<GoodLeadDto>>(basketStr);
+
+        if (!basket.Any(x => x.GoodId == _good.ParkerId))
+        {
+            basket.Add(new GoodLeadDto
+            {
+                GoodId = _good.ParkerId,
+                Engraving = null,
+                Count = 1
+            });
+        }
+
+        var newBasketStr = JsonConvert.SerializeObject(basket);
+
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", newBasketStr,
+            DateTime.Now.AddYears(10).DayOfYear);
+
+        Http.HttpContext.Request.Cookies.Append(new ("basket", newBasketStr));
+    }
+
+    private async Task DeleteFromBasket()
+    {
+        var basketStr = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+
+        var basket = JsonConvert.DeserializeObject<List<GoodLeadDto>>(basketStr);
+
+        if (basket.Any(x => x.GoodId == _good.ParkerId))
+        {
+            basket.Remove(basket.Find(x => x.GoodId == _good.ParkerId));
+        }
+
+        var newBasketStr = JsonConvert.SerializeObject(basket);
+
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", newBasketStr,
+            DateTime.Now.AddYears(10).DayOfYear);
+
+        Http.HttpContext.Request.Cookies.Append(new ("basket", newBasketStr));
+    }
 }
+

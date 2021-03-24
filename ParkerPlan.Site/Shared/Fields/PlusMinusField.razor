@@ -1,0 +1,15 @@
+﻿@{
+    var plusIcon = Icons.Material.Rounded.Add;
+    var minusIcon = Icons.Material.Rounded.Remove;
+}
+
+<MudButton StartIcon="@plusIcon" />
+<MudTextField Value="FieldValue" ValueChanged="Changed" />
+<MudButton StartIcon="@minusIcon" />
+
+@code {
+    [Parameter]
+    public int FieldValue { get; set; }
+    [Parameter]
+    public EventCallback<int> Changed { get; set; }
+}

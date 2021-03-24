@@ -29,7 +29,8 @@
                 else {
                     expires = "";
                 }
-                document.cookie = name + "=" + value + expires + "; path=/";
+                document.cookie = name + "=" + value + ";expires=Tue, 19 Jan 2038 03:14:07 GMT" +
+                    ";path=/";
             }
         }
         window.ReadCookie = {

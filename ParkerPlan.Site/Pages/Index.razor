@@ -1,4 +1,5 @@
 ﻿@page "/"
+@page "/home"
 @page "/admin/{password}"
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Dtos
@@ -68,7 +69,7 @@
     }
 }
 
-<AskIntDialog Visible="@_showDialog" Header="Введите код ручки. Его нельзя будет изменить потом." Ok="@Ok"/>
+<AskIntDialog Visible="@_showDialog" Header="Введите код ручки. Его нельзя будет изменить потом." Ok="@Ok" />
 
 @code
 {
@@ -90,21 +91,21 @@
         {
             Good = new GoodDto
             {
-                ParkerId = value, 
-                Name = "", 
+                ParkerId = value,
+                Name = "",
                 Collection = "",
-                AbleForMan = false, 
+                AbleForMan = false,
                 AbleForWoman = false,
                 GoldDetails = false,
                 GoldPen = false,
-                WritingNodeType = WritingNodeType.Round, 
-                Price = 0, 
-                AbleToEngraving = false, 
-                Description = null, 
+                WritingNodeType = WritingNodeType.Round,
+                Price = 0,
+                AbleToEngraving = false,
+                Description = null,
                 InSpb = 0,
-                InMsk = 0, 
-                InUfa = 0, 
-                InEkt = 0, 
+                InMsk = 0,
+                InUfa = 0,
+                InEkt = 0,
                 SelfPrice = 0
             }
         });

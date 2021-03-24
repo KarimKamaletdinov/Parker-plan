@@ -5,15 +5,16 @@
 @using ParkerPlan.Abstractions.Dtos
 @using Newtonsoft.Json
 @using ParkerPlan.Abstractions.Enums
+@using Microsoft.AspNetCore.Http
 @inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject IJSRuntime Js
+@inject IHttpContextAccessor Context
 
-@{
-    Goods = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
-}
+<MudButton OnClick="WriteCookies">обновить куки</MudButton>
+<MudButton OnClick="ReadCookies">Показать корзину</MudButton>
 
-<MudTable Items="@Goods">
+<MudTable Items="@_pens">
     <HeaderContent>
         <MudTh>Nr</MudTh>
         <MudTh>Sign</MudTh>
@@ -30,22 +31,29 @@
 {
     private string JsonBasket { get; set; }
 
-    private GoodLeadDto[] Goods;
+    private GoodLeadDto[] _pens;
 
-    protected async Task WriteCookies(string value)
+    protected async Task WriteCookies()
     {
-        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", value,
-     DateTime.Now.AddMinutes(1));
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", "[]",
+     DateTime.Now.AddYears(10));
     }
     protected async Task ReadCookies()
     {
         JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+        _pens = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
     }
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        ReadCookies();
-    }
+    //protected override void OnInitialized()
+    //{
+    //    JsonBasket = Context?.HttpContext?.Request.Cookies["basket"];
+    //    try
+    //    {
+    //        _pens = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        Console.WriteLine(e);
+    //    }
+    //}
 }

@@ -23,7 +23,7 @@
         <MudItem Style="width: 49%">
             <MudPaper Elevation="2" Class="pa-4">
                 <MudText Typo="Typo.h5" Align="Align.Left">
-                    <MudTextField Value="_good.Description" />
+                    <MudTextField Value="_good.Description" TextChanged="DescrChanged" />
                 </MudText>
             </MudPaper>
         </MudItem>
@@ -163,7 +163,7 @@
 
     private void CollChanged(object val)
     {
-        _good.Name = val.ToString();
+        _good.Collection = val.ToString();
     }
 
     private void VntChanged(object val)
@@ -219,6 +219,11 @@
     private void FWomanChanged(bool val)
     {
         _good.AbleForWoman = val;
+    }
+
+    private void DescrChanged(string val)
+    {
+        _good.Description = val;
     }
 
     private void Save()
