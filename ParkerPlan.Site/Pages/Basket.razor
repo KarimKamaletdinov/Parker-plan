@@ -6,6 +6,7 @@
 @using Newtonsoft.Json
 @using ParkerPlan.Abstractions.Enums
 @using Microsoft.AspNetCore.Http
+@using System.Diagnostics.Eventing.Reader
 @inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject IJSRuntime Js
@@ -14,17 +15,40 @@
 <MudButton OnClick="WriteCookies">обновить куки</MudButton>
 <MudButton OnClick="ReadCookies">Показать корзину</MudButton>
 
-<MudTable Items="@_pens">
-    <HeaderContent>
-        <MudTh>Nr</MudTh>
-        <MudTh>Sign</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Nr">@context.GoodId</MudTd>
-        <MudTd DataLabel="Sign">@context.Count</MudTd>
-    </RowTemplate>
-</MudTable>
-
+@if (_pens != null && _pens.Length > 0)
+{
+    <MudTable Items="@_pens">
+        <HeaderContent>
+            <MudTh>Наименование</MudTh>
+            <MudTh>Код</MudTh>
+            <MudTh>Кол-во</MudTh>
+            <MudTh>Гравировка</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            @{
+                    var pen = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == context.GoodId);
+            }
+            <MudTd DataLabel="Наименование">@pen.Name</MudTd>
+            <MudTd DataLabel="Код">@pen.ParkerId</MudTd>
+            <MudTd DataLabel="Кол-во">
+                <PlusMinusField Changed="i => { ChangeCount(pen.ParkerId, i); WriteCookies(); }"
+                                MaxValue="100" MinValue="0" FieldValue="@context.Count"/>
+            </MudTd>
+            <MudTd DataLabel="Гравировка">    
+                <StringInRowField Changed="i => { ChangeEng(pen.ParkerId, i); WriteCookies(); }"
+                                  FieldValue="@context.Engraving"/>
+                </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+else if (_pens != null)
+{
+    <MudText Align="Align.Center" Typo="Typo.h3">Корзина пуста</MudText>
+}
+else
+{
+    <MudText Align="Align.Center" Typo="Typo.h3">Нажмите"Показать корзину"</MudText>
+}
 
 
 @code
@@ -33,27 +57,24 @@
 
     private GoodLeadDto[] _pens;
 
+    private void ChangeCount(int id, int val)
+    {
+        _pens.First(x => x.GoodId == id).Count = val;
+    }
+
+    private void ChangeEng(int id, string val)
+    {
+        _pens.First(x => x.GoodId == id).Engraving = val;
+    }
+
     protected async Task WriteCookies()
     {
-        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", "[]",
-     DateTime.Now.AddYears(10));
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", 
+            JsonConvert.SerializeObject(_pens), DateTime.Now.AddYears(10));
     }
     protected async Task ReadCookies()
     {
         JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
         _pens = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
     }
-
-    //protected override void OnInitialized()
-    //{
-    //    JsonBasket = Context?.HttpContext?.Request.Cookies["basket"];
-    //    try
-    //    {
-    //        _pens = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        Console.WriteLine(e);
-    //    }
-    //}
 }

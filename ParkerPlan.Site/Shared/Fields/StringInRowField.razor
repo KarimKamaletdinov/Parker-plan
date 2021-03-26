@@ -1,0 +1,11 @@
+﻿
+<div style="display: inline-block">
+    <MudTextField Value="FieldValue" ValueChanged="Changed" />
+</div>
+
+@code {
+    [Parameter]
+    public string FieldValue { get; set; }
+    [Parameter]
+    public EventCallback<string> Changed { get; set; }
+}
