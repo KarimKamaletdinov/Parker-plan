@@ -1,14 +1,22 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
 using ParkerPlan.Abstractions;
+using ParkerPlan.Abstractions.Commands.Costumer;
 using ParkerPlan.Abstractions.Commands.Good;
+using ParkerPlan.Abstractions.Commands.Lead;
 using ParkerPlan.Abstractions.Dtos;
 using ParkerPlan.Abstractions.Queries;
+using ParkerPlan.CommandHandlers.Costumer;
 using ParkerPlan.CommandHandlers.Good;
+using ParkerPlan.CommandHandlers.Lead;
 using ParkerPlan.QueryHandlers;
 using ParkerPlan.Repositories;
 using ParkerPlan.Site.Data;
@@ -36,7 +44,18 @@ namespace ParkerPlan.Site
             services.AddScoped<ICommandHandler<InsertGood>, InsertGoodCommandHandler>();
             services.AddScoped<ICommandHandler<DeleteGood>, DeleteGoodCommandHandler>();
             services.AddScoped<SqlGoodRepository>();
+            services.AddScoped<IQueryHandler<GetCostumers, CostumerDto[]>, GetCostumersQueryHandler>();
+            services.AddScoped<ICommandHandler<UpdateCostumer>, UpdateCostumerCommandHandler>();
+            services.AddScoped<ICommandHandler<InsertCostumer>, InsertCostumerCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteCostumer>, DeleteCostumerCommandHandler>();
+            services.AddScoped<SqlCostumerRepository>();
+            services.AddScoped<IQueryHandler<GetLeads, LeadDto[]>, GetLeadsQueryHandler>();
+            services.AddScoped<ICommandHandler<UpdateLead>, UpdateLeadCommandHandler>();
+            services.AddScoped<ICommandHandler<InsertLead>, InsertLeadCommandHandler>();
+            services.AddScoped<ICommandHandler<DeleteLead>, DeleteLeadCommandHandler>();
+            services.AddScoped<SqlLeadRepository>();
             services.AddScoped<PasswordService>();
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,14 +74,30 @@ namespace ParkerPlan.Site
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+        }
+    }
+
+
+    public class CustomAuthStateProvider
+    {
+        public Task<AuthenticationState> GetAuthenticationStateAsync(string name, string password)
+        {
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Surname, password)
+            }, "Fake authentication type");
+
+            var user = new ClaimsPrincipal(identity);
+
+            return Task.FromResult(new AuthenticationState(user));
         }
     }
 }

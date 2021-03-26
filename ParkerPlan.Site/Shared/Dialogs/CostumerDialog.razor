@@ -1,0 +1,81 @@
+﻿<MudDialog IsVisible="Visible">
+    <DialogContent>
+        <MudText Typo="Typo.h4">
+            Введите пароль
+        </MudText>
+        <MudDivider />
+        @{
+            var helperText = _pwdCorrect ? "Пароль верный" : "Неправильный пароль";
+        }
+        <MudText>Введите имя пользователя</MudText>
+        <MudTextField @bind-Value="@_wrtnName" />
+        <MudText>Введите пароль</MudText>
+        <MudTextField @bind-Value="@_wrtnPwd" HelperText="@helperText" />
+    </DialogContent>
+
+    <DialogActions>
+        <a href="@OkLink">
+            <MudButton Disabled="!_pwdCorrect" Link="@this.OkLink">
+                OK
+            </MudButton>
+        </a>
+        <MudButton OnClick="CloseMe">
+            Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public (string, string, int)[] UserPasswords { get; set; }
+
+    private string OkLink { get; set; } = "/basket/NAME/PWD";
+
+    [Parameter]
+    public EventCallback CloseMe { get; set; } = new();
+
+    private bool _pwdCorrect;
+
+    private string _wrtnPwd1 = "";
+
+    private string _wrtnName1 = "";
+
+    private string _wrtnPwd
+    {
+        get => _wrtnPwd1;
+        set
+        {
+            _wrtnPwd1 = value;
+
+            WrittenPwdChanged();
+        }
+    }
+
+    private string _wrtnName
+    {
+        get => _wrtnName1;
+        set
+        {
+            _wrtnName1 = value;
+
+            WrittenPwdChanged();
+        }
+    }
+
+    private void WrittenPwdChanged()
+    {
+        _pwdCorrect = false;
+
+        foreach (var user in UserPasswords)
+        {
+            if (user.Item1 == _wrtnName && user.Item2 == _wrtnPwd)
+            {
+                OkLink = $"/basket/{user.Item3}/{user.Item2}";
+                _pwdCorrect = true;
+            }
+        }
+    }
+}
