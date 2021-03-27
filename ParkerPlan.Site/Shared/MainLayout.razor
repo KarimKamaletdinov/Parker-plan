@@ -15,9 +15,10 @@
             var icon = Icons.Material.Filled.House;
             var adminIcon = Icons.Material.Filled.Settings;
         }
+        <CheckSity AutoInit="true"/>
         <MudIconButton Icon="@icon" Color="Color.Inherit" Link="/"/>
-        <MudIconButton Icon="@adminIcon" Color="Color.Inherit" OnClick="() => { _showDialog = true; }"/>
-        <ChangeEnumField EnumValues=""/>
+        <MudIconButton Icon="@adminIcon" Color="Color.Inherit"
+                       OnClick="() => { _showDialog = true; }"/>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>

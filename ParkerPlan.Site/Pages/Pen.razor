@@ -104,12 +104,23 @@
     {
         var basketStr = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
 
-        var basket = JsonConvert.DeserializeObject<List<GoodLeadDto>>(basketStr);
+        var basket = JsonConvert.DeserializeObject<List<BasketItem>>(basketStr);
 
         if (!basket.Any(x => x.GoodId == _good.ParkerId))
         {
-            basket.Add(new GoodLeadDto
+            var id = _good.ParkerId;
+
+            bool chech()
             {
+                foreach (var pen in basket)
+                {
+
+                }
+            }
+
+            basket.Add(new BasketItem()
+            {
+
                 GoodId = _good.ParkerId,
                 Engraving = null,
                 Count = 1

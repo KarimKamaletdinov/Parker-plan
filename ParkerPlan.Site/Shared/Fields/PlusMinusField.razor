@@ -3,12 +3,12 @@
     var minusIcon = Icons.Material.Rounded.Remove;
 }
 
-<MudButton StartIcon="@plusIcon" OnClick="() => { this.FieldValue++; Changed.InvokeAsync(FieldValue); }"/>
+<MudButton StartIcon="@plusIcon" OnClick="@Plus"/>
 <div style="display: inline-block">
     <MudTextField Value="FieldValue" ValueChanged="Changed" 
                   Validation="new Func<int, bool>(CheckValidation)"/>
 </div>
-<MudButton StartIcon="@minusIcon" OnClick="() => { this.FieldValue--;  Changed.InvokeAsync(FieldValue);}"/>
+<MudButton StartIcon="@minusIcon" OnClick="@Minus"/>
 
 @code {
     [Parameter]
@@ -22,6 +22,24 @@
 
     private bool CheckValidation(int value)
     {
-        return value > MinValue && value < MaxValue;
+        return value >= MinValue && value <= MaxValue;
+    }
+
+    private void Plus()
+    {
+        if (CheckValidation(FieldValue + 1))
+        {
+            FieldValue += 1;
+            Changed.InvokeAsync(FieldValue);
+        }
+    }
+
+    private void Minus()
+    {
+        if (CheckValidation(FieldValue - 1))
+        {
+            FieldValue -= 1;
+            Changed.InvokeAsync(FieldValue);
+        }
     }
 }

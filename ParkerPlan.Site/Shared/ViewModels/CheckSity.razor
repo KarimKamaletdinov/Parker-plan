@@ -1,5 +1,153 @@
-﻿<h3>CheckSity</h3>
+﻿@using ParkerPlan.Site.Data
+@inject IJSRuntime Js
 
-@code {
+@if (AutoInit)
+{
+    ReadCookies();
+}
+@{
+    var icon = Icons.Material.Rounded.EditLocation;
+}
+<MudButton OnClick="() => { _showDialog = true; }" StartIcon="@icon" Color="Color.Inherit">
+    Указать город
+</MudButton>
 
+<MudDialog IsVisible="_showDialog">
+    <DialogContent>
+        <MudText Typo="Typo.h4">Укажите город</MudText>
+        @*<ChangeEnumField EnumValues="Sities" FieldName="Город" FieldValue="@Value"
+            Changed="ValueChanged"/>*@
+        <MudSelect Value="@Value" ValueChanged="(string v) => {ValueChanged(v); }">
+            @foreach (var value in Sities)
+            {
+                <MudSelectItem Value="value" />
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="() => { _showDialog = false; }">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code
+{
+    private EventCallback<string> Changed { get; set; }
+
+    private bool _showDialog;
+
+    private static readonly string[] Sities =
+    {
+        "Москва",
+        "Санкт-Петербург",
+        "Уфа",
+        "Екатеринбург",
+        "Другой"
+    };
+
+    private int _valueNumber;
+
+    [Parameter]
+    public string Value
+    {
+        get => Sities[_valueNumber];
+        set
+        {
+            for (var i = 0; i < Sities.Length; i++)
+            {
+                var sity = Sities[i];
+
+                if (sity == value)
+                {
+                    _valueNumber = i;
+                }
+            }
+
+            if (AutoInit)
+            {
+                WriteCookies();
+            }
+        }
+    }
+
+    [Parameter]
+    public Sity EnumValue
+    {
+        get
+        {
+            switch (_valueNumber)
+            {
+                case 0:
+                    return Sity.Mosсow;
+                case 1:
+                    return Sity.StPeterburg;
+                case 2:
+                    return Sity.Ufa;
+                case 3:
+                    return Sity.Ekaterinburg;
+                case 4:
+                    return Sity.Another;
+                default:
+                    return Sity.Another;
+            }
+        }
+        set
+        {
+            switch (value)
+            {
+                case Sity.Mosсow:
+                    _valueNumber = 0;
+                    break;
+                case Sity.StPeterburg:
+                    _valueNumber = 1;
+                    break;
+                case Sity.Ufa:
+                    _valueNumber = 2;
+                    break;
+                case Sity.Ekaterinburg:
+                    _valueNumber = 3;
+                    break;
+                case Sity.Another:
+                    _valueNumber = 4;
+                    break;
+                default:
+                    _valueNumber = 4;
+                    break;
+            }
+
+            if (AutoInit)
+            {
+                WriteCookies();
+            }
+        }
+    }
+
+    private void ValueChanged(string value)
+    {
+        Value = value;
+
+        OnChanged.InvokeAsync(value);
+    }
+
+    private bool _isFirst = true;
+
+    [Parameter]
+    public bool AutoInit { get; set; }
+
+
+    protected async Task WriteCookies()
+    {
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "sity",  EnumValue.ToString(),
+            DateTime.Now.AddYears(10));
+    }
+    protected async Task ReadCookies()
+    {
+        EnumValue = Enum.Parse<Sity>( await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+
+        if (_isFirst)
+        {
+            _isFirst = false;
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> OnChanged { get; set; } = new();
 }

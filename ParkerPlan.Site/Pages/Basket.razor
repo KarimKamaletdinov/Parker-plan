@@ -7,6 +7,7 @@
 @using ParkerPlan.Abstractions.Enums
 @using Microsoft.AspNetCore.Http
 @using System.Diagnostics.Eventing.Reader
+@using ParkerPlan.Site.Data
 @inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject IJSRuntime Js
@@ -17,12 +18,17 @@
 
 @if (_pens != null && _pens.Length > 0)
 {
+    <MudText Align="Align.Center" Typo="Typo.h4">
+        Ваш город: @_sity
+        <CheckSity AutoInit="true" OnChanged="@((string value) => { _sity = value; })" />
+    </MudText>
     <MudTable Items="@_pens">
         <HeaderContent>
             <MudTh>Наименование</MudTh>
             <MudTh>Код</MudTh>
             <MudTh>Кол-во</MudTh>
             <MudTh>Гравировка</MudTh>
+            <MudTh>Действия</MudTh>
         </HeaderContent>
         <RowTemplate>
             @{
@@ -32,12 +38,19 @@
             <MudTd DataLabel="Код">@pen.ParkerId</MudTd>
             <MudTd DataLabel="Кол-во">
                 <PlusMinusField Changed="i => { ChangeCount(pen.ParkerId, i); WriteCookies(); }"
-                                MaxValue="100" MinValue="0" FieldValue="@context.Count"/>
+                                MaxValue="@GetCount(pen.ParkerId)" MinValue="0" FieldValue="@context.Count" />
             </MudTd>
-            <MudTd DataLabel="Гравировка">    
+            <MudTd DataLabel="Гравировка">
                 <StringInRowField Changed="i => { ChangeEng(pen.ParkerId, i); WriteCookies(); }"
-                                  FieldValue="@context.Engraving"/>
-                </MudTd>
+                                  FieldValue="@context.Engraving" />
+            </MudTd>
+            <MudTd DataLabel="Действия">
+                @{
+                    var deleteIcon = Icons.Material.Filled.Delete;
+                    var makeDoubleIcon = Icons.Material.Filled.ExposurePlus1;
+                }
+                <MudIconButton Icon="@makeDoubleIcon" OnClick="() => { MakeDouble(context.GoodId); }"/>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -53,9 +66,11 @@ else
 
 @code
 {
+    private string _sity = "";
+
     private string JsonBasket { get; set; }
 
-    private GoodLeadDto[] _pens;
+    private BasketItem[] _pens;
 
     private void ChangeCount(int id, int val)
     {
@@ -67,14 +82,74 @@ else
         _pens.First(x => x.GoodId == id).Engraving = val;
     }
 
+    private int GetCount(int penId)
+    {
+        var pen = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == penId);
+        switch (_sity)
+        {
+            case "Москва":
+                return pen.InMsk;
+            case "Санкт-Петербург":
+                return pen.InSpb;
+            case "Уфа":
+                return pen.InUfa;
+            case "Екатеринбург":
+                return pen.InEkt;
+            case "Другой":
+                return pen.InMsk + pen.InSpb + pen.InEkt + pen.InUfa;
+        }
+        return 0;
+    }
+
     protected async Task WriteCookies()
     {
-        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", 
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket",
             JsonConvert.SerializeObject(_pens), DateTime.Now.AddYears(10));
     }
+
     protected async Task ReadCookies()
     {
         JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
-        _pens = JsonConvert.DeserializeObject<GoodLeadDto[]>(JsonBasket);
+        _pens = JsonConvert.DeserializeObject<BasketItem[]>(JsonBasket);
+        var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+
+        switch (sity)
+        {
+            case Sity.Mosсow:
+                _sity = "Москва";
+                break;
+            case Sity.StPeterburg:
+                _sity = "Санкт-Петербург";
+                break;
+            case Sity.Ufa:
+                _sity = "Уфа";
+                break;
+            case Sity.Ekaterinburg:
+                _sity = "Екатеринбург";
+                break;
+            case Sity.Another:
+                _sity = "Другой";
+                break;
+            default:
+                _sity = "Другой";
+                break;
+        }
+    }
+
+    private void Delete(int id)
+    {
+        var pens = _pens.ToList();
+        pens.Remove(pens.Find(x => x.GoodId == id));
+        _pens = pens.ToArray();
+        WriteCookies();
+    }
+
+    private void MakeDouble(int id)
+    {
+        var pens = _pens.ToList();
+        pens.Add(pens.Find(x => x.GoodId == id));
+        _pens = pens.ToArray();
+        WriteCookies();
     }
 }
+
