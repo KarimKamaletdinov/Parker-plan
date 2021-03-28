@@ -19,18 +19,29 @@
         var imgUrl = $"pens/PEN{_good.ParkerId}.bmp";
     }
     <MudGrid>
-        <MudItem Style="width: 50%">
+        <MudItem xs="6">
             <MudPaper Elevation="2" Class="pa-4">
                 <img src=@imgUrl />
             </MudPaper>
         </MudItem>
-        <MudItem Style="width: 49%">
+        <MudItem xs="6">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudText Typo="Typo.h3" Align="Align.Left">
+                    @_good.Name
+                </MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6">
             <MudPaper Elevation="2" Class="pa-4">
                 <MudText Typo="Typo.h5" Align="Align.Left">
                     @_good.Description
                 </MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6">
+            <MudPaper Elevation="2" Class="pa-4">
                 <MudButton OnClick="AddToBasket">Добавить в корзину</MudButton>
-                <MudButton OnClick="DeleteFromBasket">Удалить из корзины</MudButton>
+                @*<MudButton OnClick="DeleteFromBasket">Удалить из корзины</MudButton>*@
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -106,26 +117,28 @@
 
         var basket = JsonConvert.DeserializeObject<List<BasketItem>>(basketStr);
 
-        if (!basket.Any(x => x.GoodId == _good.ParkerId))
+        var id = Check();
+
+        int Check()
         {
-            var id = _good.ParkerId;
+            var i = 0;
 
-            bool chech()
+            while (basket.Any(x => x.Id == i))
             {
-                foreach (var pen in basket)
-                {
-
-                }
+                i++;
             }
 
-            basket.Add(new BasketItem()
-            {
-
-                GoodId = _good.ParkerId,
-                Engraving = null,
-                Count = 1
-            });
+            return i;
         }
+
+        basket.Add(new BasketItem()
+        {
+
+            GoodId = _good.ParkerId,
+            Engraving = null,
+            Count = 1,
+            Id = id
+        });
 
         var newBasketStr = JsonConvert.SerializeObject(basket);
 

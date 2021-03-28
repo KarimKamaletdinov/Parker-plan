@@ -1,0 +1,109 @@
+﻿@page "/order/"
+@using Newtonsoft.Json
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Site.Data
+@inject IJSRuntime Js
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+
+<MudButton Link="/basket/">Назад к корзине</MudButton>
+
+<MudButton OnClick="ReadCookies">Оформить заказ</MudButton>
+
+@if (!_valuesChecked && _pens != null)
+{
+    <MudPaper Elevation="2" Class="pa-4">
+        <MudTextField Value="_name" ValueChanged="@((string name) => { _name = name; })"
+                      HelperText="Как к вам обращаться?" />
+        <MudTextField Value="_phone" ValueChanged="@((string phone) => { _phone = phone; })"
+                      HelperText="Номер телефона" />
+        <MudTextField Value="_region" ValueChanged="@((string region) => { _region = region; })"
+                      HelperText="Регион"/>
+        <MudTextField Value="_sity" ValueChanged="@((string sity) => { _sity = sity; })"
+                      HelperText="Город"/>
+        <MudTextField Value="_street" ValueChanged="@((string street) => { _street = street; })"
+                      HelperText="Улица"/>
+        <MudTextField Value="_house" ValueChanged="@((string house) => { _house = house; })"
+                      HelperText="Дом"/>
+        <MudTextField Value="_flat" ValueChanged="@((string flat) => { _flat = flat; })"
+                      HelperText="Квартира"/>
+        <MudDatePicker @bind-value="@_daliveryDate"/>
+    </MudPaper>
+}
+
+@code
+{
+    private string _name;
+
+    private string _phone;
+
+    private string _region;
+
+    private string _sity;
+
+    private string _street;
+
+    private string _house;
+
+    private string _flat;
+
+    private DateTime _daliveryDate = DateTime.Now;
+
+    private BasketItem[] _pens;
+
+    private bool _valuesChecked = false;
+
+    private int GetCount(int penId)
+    {
+        var pen = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == penId);
+        switch (_sity)
+        {
+            case "Москва":
+                return pen.InMsk;
+            case "Санкт-Петербург":
+                return pen.InSpb;
+            case "Уфа":
+                return pen.InUfa;
+            case "Екатеринбург":
+                return pen.InEkt;
+            case "":
+                return pen.InMsk + pen.InSpb + pen.InEkt + pen.InUfa;
+        }
+        return 0;
+    }
+
+    protected async Task ReadCookies()
+    {
+        var jsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+        _pens = JsonConvert.DeserializeObject<BasketItem[]>(jsonBasket);
+        var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+
+        switch (sity)
+        {
+            case Sity.Mosсow:
+                _sity = "Москва";
+                _region = "Москва";
+                break;
+            case Sity.StPeterburg:
+                _sity = "Санкт-Петербург";
+                _region = "Санкт-Петербург";
+                break;
+            case Sity.Ufa:
+                _sity = "Уфа";
+                _region = "Республика Башкортостан";
+                break;
+            case Sity.Ekaterinburg:
+                _sity = "Екатеринбург";
+                _region = "Свердловская область";
+                break;
+            case Sity.Another:
+                _sity = "";
+                _region = "";
+                break;
+            default:
+                _sity = "";
+                break;
+        }
+    }
+}

@@ -12,8 +12,8 @@
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject IJSRuntime Js
 @inject IHttpContextAccessor Context
-
-<MudButton OnClick="WriteCookies">обновить куки</MudButton>
+@inject PriceCalculatorService PriceCalculator
+@*<MudButton OnClick="WriteCookies">обновить куки</MudButton>*@
 <MudButton OnClick="ReadCookies">Показать корзину</MudButton>
 
 @if (_pens != null && _pens.Length > 0)
@@ -28,31 +28,54 @@
             <MudTh>Код</MudTh>
             <MudTh>Кол-во</MudTh>
             <MudTh>Гравировка</MudTh>
-            <MudTh>Действия</MudTh>
+            <MudTh>Стоимость</MudTh>
+            <MudTh>Стоимость гравировки</MudTh>
+            <MudTh>...</MudTh>
         </HeaderContent>
         <RowTemplate>
             @{
                     var pen = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == context.GoodId);
+
+                    if (GetCount(pen.ParkerId) < 1)
+                    {
+                        context.Count = 0;
+                    }
             }
             <MudTd DataLabel="Наименование">@pen.Name</MudTd>
             <MudTd DataLabel="Код">@pen.ParkerId</MudTd>
             <MudTd DataLabel="Кол-во">
-                <PlusMinusField Changed="i => { ChangeCount(pen.ParkerId, i); WriteCookies(); }"
-                                MaxValue="@GetCount(pen.ParkerId)" MinValue="0" FieldValue="@context.Count" />
+                <PlusMinusField Changed="i => { ChangeCount(context.Id, i); WriteCookies(); }"
+                                MaxValue="@GetCount(pen.ParkerId)" MinValue="1"
+                                FieldValue="GetCount(pen.ParkerId) > 0 ? context.Count : 0"
+                                Enabled="@(GetCount(pen.ParkerId) > 0)" />
             </MudTd>
             <MudTd DataLabel="Гравировка">
-                <StringInRowField Changed="i => { ChangeEng(pen.ParkerId, i); WriteCookies(); }"
-                                  FieldValue="@context.Engraving" />
+                <StringInRowField Changed="i => { ChangeEng(context.Id, i); WriteCookies(); }"
+                                  FieldValue="@context.Engraving" Enabled="@(pen.AbleToEngraving)" />
             </MudTd>
-            <MudTd DataLabel="Действия">
+            <MudTd DataLabel="Стоимость">@(pen.Price * context.Count) </MudTd>
+            <MudTd DataLabel="Стоимость гравировки">
+                @(string.IsNullOrEmpty(context.Engraving) ? "-" :
+                                                        PriceCalculator.GetEngravingPrice())
+            </MudTd>
+            <MudTd DataLabel="...">
                 @{
-                    var deleteIcon = Icons.Material.Filled.Delete;
-                    var makeDoubleIcon = Icons.Material.Filled.ExposurePlus1;
+                        var deleteIcon = Icons.Material.Filled.Delete;
+                        var makeDoubleIcon = Icons.Material.Filled.ExposurePlus1;
                 }
-                <MudIconButton Icon="@makeDoubleIcon" OnClick="() => { MakeDouble(context.GoodId); }"/>
+                <MudIconButton Icon="@deleteIcon" OnClick="() => { Delete(context.Id); }" />
+                <MudIconButton Icon="@makeDoubleIcon" OnClick="() => { MakeDouble(context.Id); }" />
             </MudTd>
         </RowTemplate>
     </MudTable>
+
+    <MudPaper Elevation="2" Class="pa-4">
+        <FieldRow FieldName="Итого:" FieldValue="@(CalcSumm() + " руб.")" />
+    </MudPaper>
+
+    <MudPaper Elevation="2" Class="pa-4">
+        <MudButton Link="/order/">Оформить заказ</MudButton>
+    </MudPaper>
 }
 else if (_pens != null)
 {
@@ -74,12 +97,23 @@ else
 
     private void ChangeCount(int id, int val)
     {
-        _pens.First(x => x.GoodId == id).Count = val;
+        _pens.First(x => x.Id == id).Count = val;
     }
 
     private void ChangeEng(int id, string val)
     {
-        _pens.First(x => x.GoodId == id).Engraving = val;
+        _pens.First(x => x.Id == id).Engraving = val;
+    }
+
+    private int CalcSumm()
+    {
+        return PriceCalculator.CalculateFullPrice(_pens.Select(
+            x => new GoodLeadDto
+            {
+                Count = x.Count,
+                Engraving = x.Engraving,
+                GoodId = x.GoodId
+            }).ToArray());
     }
 
     private int GetCount(int penId)
@@ -139,15 +173,34 @@ else
     private void Delete(int id)
     {
         var pens = _pens.ToList();
-        pens.Remove(pens.Find(x => x.GoodId == id));
+        pens.Remove(pens.Find(x => x.Id == id));
         _pens = pens.ToArray();
         WriteCookies();
     }
 
     private void MakeDouble(int id)
     {
+        int Check()
+        {
+            var i = 0;
+
+            while (_pens.Any(x => x.Id == i))
+            {
+                i++;
+            }
+
+            return i;
+        }
+
         var pens = _pens.ToList();
-        pens.Add(pens.Find(x => x.GoodId == id));
+        var pen = pens.Find(x => x.Id == id);
+        pens.Add(new BasketItem
+        {
+            Count = pen.Count,
+            Engraving = pen.Engraving,
+            GoodId = pen.GoodId,
+            Id = Check()
+        });
         _pens = pens.ToArray();
         WriteCookies();
     }

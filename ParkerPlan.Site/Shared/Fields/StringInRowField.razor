@@ -1,11 +1,13 @@
 ﻿
 <div style="display: inline-block">
-    <MudTextField Value="FieldValue" ValueChanged="Changed" />
+    <MudTextField Value="FieldValue" ValueChanged="Changed" Disabled="!Enabled"/>
 </div>
 
 @code {
     [Parameter]
     public string FieldValue { get; set; }
+    [Parameter]
+    public bool Enabled { get; set; } = true;
     [Parameter]
     public EventCallback<string> Changed { get; set; }
 }

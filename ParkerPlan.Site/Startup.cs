@@ -55,6 +55,7 @@ namespace ParkerPlan.Site
             services.AddScoped<ICommandHandler<DeleteLead>, DeleteLeadCommandHandler>();
             services.AddScoped<SqlLeadRepository>();
             services.AddScoped<PasswordService>();
+            services.AddScoped<PriceCalculatorService>();
             services.AddHttpContextAccessor();
         }
 
