@@ -36,7 +36,8 @@ namespace ParkerPlan.QueryHandlers
                 DeliveryMethod = x.DeliveryMethod,
                 PayMethod = x.PayMethod,
                 Comment = x.Comment,
-                CostumerId = x.CostumerId
+                CostumerId = x.CostumerId,
+                FullPrice = x.FullPrice
             }).ToArray();
         }
     }

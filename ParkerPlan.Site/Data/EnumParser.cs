@@ -7,19 +7,30 @@ namespace ParkerPlan.Site.Data
     {
         public DeliveryMethod ParseDeliveryMethod(string value)
         {
-            switch (value)
+            return value switch
             {
-                case "Нашим курьером":
-                    return DeliveryMethod.OurDeliverer;
-                case "Курьером СДЭК":
-                    return DeliveryMethod.OurDeliverer;
-                case "Из пункта выдачи":
-                    return DeliveryMethod.OurDeliverer;
-                case "Нашим курьером":
-                    return DeliveryMethod.OurDeliverer;
-            }
+                "Нашим курьером" => DeliveryMethod.OurDeliverer,
+                "Курьером СДЭК" => DeliveryMethod.SdekDeliverer,
+                "Из пункта выдачи СДЭК" => DeliveryMethod.FromSdek,
+                "Из магазина" => DeliveryMethod.FromMarket,
+                _ => throw new Exception($"Ошибка чтения: {value}. VALUE может быть: " +
+                    $"{ToStringDeliveryMethod(DeliveryMethod.FromMarket)}," +
+                    $"{ToStringDeliveryMethod(DeliveryMethod.FromSdek)}," +
+                    $"{ToStringDeliveryMethod(DeliveryMethod.OurDeliverer)}," +
+                    $"{ToStringDeliveryMethod(DeliveryMethod.SdekDeliverer)},")
+            };
+        }
 
-            throw new Exception("Такого не бывает!!!");
+        public string ToStringDeliveryMethod(DeliveryMethod value)
+        {
+            return value switch
+            {
+                DeliveryMethod.OurDeliverer => "Нашим курьером",
+                DeliveryMethod.SdekDeliverer => "Курьером СДЭК",
+                DeliveryMethod.FromSdek => "Из пункта выдачи СДЭК",
+                DeliveryMethod.FromMarket => "Из магазина",
+                _ => throw new Exception("Такого не бывает!!!")
+            };
         }
     }
 }

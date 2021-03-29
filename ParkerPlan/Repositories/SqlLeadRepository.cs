@@ -47,7 +47,8 @@ namespace ParkerPlan.Repositories
                 delivery_method = lead.DeliveryMethod,
                 pay_method = lead.PayMethod,
                 comment = lead.Comment,
-                costumer_id = lead.CostumerId
+                costumer_id = lead.CostumerId,
+                full_price = lead.FullPrice
             });
 
             foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
@@ -82,7 +83,8 @@ namespace ParkerPlan.Repositories
                 delivery_method = lead.DeliveryMethod,
                 pay_method = lead.PayMethod,
                 comment = lead.Comment,
-                costumer_id = lead.CostumerId
+                costumer_id = lead.CostumerId,
+                full_price = lead.FullPrice
             });
 
             foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
@@ -141,7 +143,8 @@ namespace ParkerPlan.Repositories
                     DeliveryMethod = lead.delivery_method,
                     PayMethod = lead.pay_method,
                     Comment = lead.comment,
-                    CostumerId = lead.costumer_id
+                    CostumerId = lead.costumer_id,
+                    FullPrice = lead.full_price
                 });
             }
 
@@ -169,8 +172,8 @@ namespace ParkerPlan.Repositories
             public DeliveryMethod delivery_method { get; set; }
             public PayMethod pay_method { get; set; }
             public string comment { get; set; }
-
             public int? costumer_id { get; set; }
+            public int? full_price { get; set; }
         }
 
         [Table("GoodLeadRel")]
