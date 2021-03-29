@@ -56,7 +56,8 @@
             <MudTd DataLabel="Стоимость">@(pen.Price * context.Count) </MudTd>
             <MudTd DataLabel="Стоимость гравировки">
                 @(string.IsNullOrEmpty(context.Engraving) ? "-" :
-                                                        PriceCalculator.GetEngravingPrice())
+                                                        PriceCalculator.GetEngravingPrice() *
+                                                        context.Count)
             </MudTd>
             <MudTd DataLabel="...">
                 @{

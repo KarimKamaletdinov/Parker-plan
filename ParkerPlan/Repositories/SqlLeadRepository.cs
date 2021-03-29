@@ -32,8 +32,8 @@ namespace ParkerPlan.Repositories
             new SqlConnection(_connectionString).Insert(new SqlLeadDto
             {
                 id = lead.Id,
-                customer_name = lead.CustomerName,
-                customer_phone = lead.CustomerPhone,
+                costumer_name = lead.CustomerName,
+                costumer_phone = lead.CustomerPhone,
                 region = lead.Region,
                 sity = lead.Sity,
                 street = lead.Street,
@@ -52,14 +52,20 @@ namespace ParkerPlan.Repositories
             });
 
             foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
-                "SELECT * FROM LeadPenRels").Where(x => x.lead_id == lead.Id))
+                "SELECT * FROM LeadPenRel").Where(x => x.lead_id == lead.Id))
             {
                 new SqlConnection(_connectionString).Delete(dto);
             }
 
             foreach (var good in lead.Goods)
             {
-                new SqlConnection(_connectionString).Insert(good);
+                new SqlConnection(_connectionString).Insert(new SqlGoodLeadRelDto()
+                {
+                    count = good.Count,
+                    engraving = good.Engraving,
+                    pen_id = good.GoodId,
+                    lead_id = lead.Id
+                });
             }
         }
 
@@ -68,8 +74,8 @@ namespace ParkerPlan.Repositories
             new SqlConnection(_connectionString).Update(new SqlLeadDto
             {
                 id = lead.Id,
-                customer_name = lead.CustomerName,
-                customer_phone = lead.CustomerPhone,
+                costumer_name = lead.CustomerName,
+                costumer_phone = lead.CustomerPhone,
                 region = lead.Region,
                 sity = lead.Sity,
                 street = lead.Street,
@@ -88,14 +94,20 @@ namespace ParkerPlan.Repositories
             });
 
             foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
-                "SELECT * FROM LeadPenRels").Where(x => x.lead_id == lead.Id))
+                "SELECT * FROM LeadPenRel").Where(x => x.lead_id == lead.Id))
             {
                 new SqlConnection(_connectionString).Delete(dto);
             }
 
             foreach (var good in lead.Goods)
             {
-                new SqlConnection(_connectionString).Insert(good);
+                new SqlConnection(_connectionString).Insert(new SqlGoodLeadRelDto()
+                {
+                    count = good.Count,
+                    engraving = good.Engraving,
+                    pen_id = good.GoodId,
+                    lead_id = lead.Id
+                });
             }
         }
 
@@ -104,7 +116,7 @@ namespace ParkerPlan.Repositories
             new SqlConnection(_connectionString).Delete(new SqlLeadDto() { id = id });
 
             foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
-                "SELECT * FROM LeadPenRels").Where(x => x.lead_id == id))
+                "SELECT * FROM LeadPenRel").Where(x => x.lead_id == id))
             {
                 new SqlConnection(_connectionString).Delete(dto);
             }
@@ -121,8 +133,8 @@ namespace ParkerPlan.Repositories
                 result.Add(new Lead
                 {
                     Id = lead.id,
-                    CustomerName = lead.customer_name,
-                    CustomerPhone = lead.customer_phone,
+                    CustomerName = lead.costumer_name,
+                    CustomerPhone = lead.costumer_phone,
                     Region = lead.region,
                     Sity = lead.sity,
                     Street = lead.street,
@@ -131,10 +143,10 @@ namespace ParkerPlan.Repositories
                     Agreed = lead.agreed,
                     Payed = lead.payed,
                     Delivered = lead.delivered,
-                    Goods = new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>("Select * FROM" +
-                        "LeadPenRels").Where(x => x.lead_id == lead.id).Select(x => new GoodLeadDto()
+                    Goods = new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>("Select * FROM " +
+                        "LeadPenRel").Where(x => x.lead_id == lead.id).Select(x => new GoodLeadDto()
                     {
-                            GoodId = x.good_id,
+                            GoodId = x.pen_id,
                             Engraving = x.engraving,
                             Count = x.count
                     }).ToArray(),
@@ -157,8 +169,8 @@ namespace ParkerPlan.Repositories
         {
             [Key]
             public int id { get; set; }
-            public string customer_name { get; set; }
-            public string customer_phone { get; set; }
+            public string costumer_name { get; set; }
+            public string costumer_phone { get; set; }
             public string region { get; set; }
             public string sity { get; set; }
             public string street { get; set; }
@@ -176,12 +188,14 @@ namespace ParkerPlan.Repositories
             public int? full_price { get; set; }
         }
 
-        [Table("GoodLeadRel")]
+        [Table("LeadPenRel")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private class SqlGoodLeadRelDto
         {
+            [ExplicitKey]
             public int lead_id { get; set; }
-            public int good_id { get; set; }
+            [ExplicitKey]
+            public int pen_id { get; set; }
             public string engraving { get; set; }
             public int count { get; set; }
         }
