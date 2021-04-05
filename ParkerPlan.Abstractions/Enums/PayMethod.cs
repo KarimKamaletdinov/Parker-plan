@@ -2,8 +2,9 @@
 {
     public enum PayMethod
     {
+        UnknownOnTaking,
         CashOnTaking,
         CardOnTaking,
-        CardOnOrdering
+        CardOnOrdering,
     }
 }

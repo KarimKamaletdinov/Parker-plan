@@ -23,7 +23,7 @@ namespace ParkerPlan.Models
         public DeliveryMethod DeliveryMethod { get; set; }
         public PayMethod PayMethod { get; set; }
         public string Comment { get; set; }
-        public int? FullPrice => 0;
+        public int? FullPrice { get; set; }
         public int? CostumerId { get; set; }
     }
 }

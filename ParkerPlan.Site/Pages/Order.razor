@@ -1,0 +1,390 @@
+﻿@page "/order/"
+@using Newtonsoft.Json
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Commands.Lead
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Enums
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Site.Data
+@inject IJSRuntime Js
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject ICommandHandler<InsertLead> InsertLead
+@inject EnumParser EnumParser
+@inject PriceCalculatorService PriceCalculator
+
+<MudButton Link="/basket/">Назад к корзине</MudButton>
+
+<MudButton OnClick="ReadCookies">Оформить заказ</MudButton>
+
+@if (!_valuesChecked && _pens != null)
+{
+    <MudPaper Elevation="2" Class="pa-4">
+        <MudTextField Value="_name" ValueChanged="@((string name) => { _name = name; })"
+                      HelperText="Как к вам обращаться?" />
+        <MudTextField Value="_phone" ValueChanged="@((string phone) => { _phone = phone; })"
+                      HelperText="Номер телефона" />
+        <MudTextField Value="_region" ValueChanged="@((string region) => { _region = region; })"
+                      HelperText="Регион"/>
+        <MudTextField Value="_sity" ValueChanged="@((string sity) => { _sity = sity; })"
+                      HelperText="Город"/>
+        <MudTextField Value="_street" ValueChanged="@((string street) => { _street = street; })"
+                      HelperText="Улица"/>
+        <MudTextField Value="_house" ValueChanged="@((string house) => { _house = house; })"
+                      HelperText="Дом"/>
+        <MudTextField Value="_flat" ValueChanged="@((string flat) => { _flat = flat; })"
+                      HelperText="Квартира"/>
+        <MudDatePicker @bind-value="@_daliveryDate" HelperText="Когда вам удобно забрать заказ?"/>
+        <MudSelect Value="@ToStringDeliveryMethod()" OffsetY="true"
+                   ValueChanged="@((string value) => ParseDeliveryMethod(value))"
+                   HelperText="Как вам удобно получить заказ?">
+            @if (_sity == "Москва" || _sity == "Санкт-Петербург" ||
+                _sity == "Уфа" || _sity == "Екатеринбург")
+            {
+                <MudSelectItem Value="@EnumParser.ToStringDeliveryMethod(DeliveryMethod.FromMarket)"/>
+            }
+            else
+            {
+                <MudSelectItem Value="@EnumParser.ToStringDeliveryMethod(DeliveryMethod.FromSdek)"/>
+            }
+            <MudSelectItem Value="@("Доставка на дом курьером")"/>
+        </MudSelect>
+        <MudSelect Value="@ToStringPayMethod()" OffsetY="true"
+                   ValueChanged="@((string value) => ParsePayMethod(value))"
+                   HelperText="Как вам удобно оплатить заказ?">
+            <MudSelectItem Value="@("Предоплата картой")"/>
+            @if (_pens.All(x => String.IsNullOrEmpty(x.Engraving)))
+            {
+                <MudSelectItem Value="@("Наличными при получении")"/>
+                <MudSelectItem Value="@("Картой при получении")"/>
+                <MudSelectItem Value="@("Наличными или картой при получении")"/>
+            }
+        </MudSelect>
+    </MudPaper>
+
+    <MudButton OnClick="@(() => _valuesChecked = true)">Далее</MudButton>
+}
+else if(_pens != null)
+{
+    <MudSimpleTable Hover="true">
+        <thead>
+        <tr>
+            <th>
+                Наименование
+            </th>
+            <th>
+                Цена
+            </th>
+            <th>
+                Кол-во
+            </th>
+            <th>
+                Стоимость
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach(var pen in _pens)
+        {
+            var good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == pen.GoodId);
+
+            <tr>
+                <td>
+                    @good.Name
+                </td>
+                <td>
+                    @good.Price
+                </td>
+                <td>
+                    @pen.Count
+                </td>
+                <td>
+                    @(good.Price * pen.Count)
+                </td>
+            </tr>
+        }
+        @foreach (var pen in _pens.Where(x => !string.IsNullOrEmpty(x.Engraving)))
+        {
+            <tr>
+                <td>
+                    Гравировка "@pen.Engraving"
+                </td>
+                <td>
+                    @PriceCalculator.GetEngravingPrice()
+                </td>
+                <td>
+                    @pen.Count
+                </td>
+                <td>
+                    @(PriceCalculator.GetEngravingPrice() * pen.Count)
+                </td>
+            </tr>
+        }
+        @if (_deliveryMethod == DeliveryMethod.FromSdek)
+        {
+            <tr>
+                <td>
+                    Доставка СДЕК из пункта выдачи
+                </td>
+                <td>
+                    @PriceCalculator.GetFromSdekPrice()
+                </td>
+                <td>
+                    @(1)
+                </td>
+                <td>
+                    @PriceCalculator.GetFromSdekPrice()
+                </td>
+            </tr>
+        }
+        @if (_deliveryMethod == DeliveryMethod.SdekDeliverer)
+        {
+            <tr>
+                <td>
+                    Доставка СДЕК курьером до двери
+                </td>
+                <td>
+                    @PriceCalculator.GetSdekDelivererPrice()
+                </td>
+                <td>
+                    @(1)
+                </td>
+                <td>
+                    @PriceCalculator.GetSdekDelivererPrice()
+                </td>
+            </tr>
+        }
+        @if (_deliveryMethod == DeliveryMethod.OurDeliverer)
+        {
+            <tr>
+                <td>
+                    Доставка курьером до двери
+                </td>
+                <td>
+                    @PriceCalculator.GetOurDerlivererPrice()
+                </td>
+                <td>
+                    @(1)
+                </td>
+                <td>
+                    @PriceCalculator.GetOurDerlivererPrice()
+                </td>
+            </tr>
+        }
+        </tbody>
+        <tfoot>
+        <tr>
+            <td>
+                ИТОГО
+            </td>
+            <td>
+                
+            </td>
+            <td>
+                
+            </td>
+            <td>
+                @PriceCalculator.CalculateFullPrice(_pens.Select(x => 
+                    new GoodLeadDto
+                    {
+                        Count = x.Count,
+                        Engraving = x.Engraving,
+                        GoodId = x.GoodId
+                    }).ToArray(), _deliveryMethod)
+            </td>
+        </tr>
+        </tfoot>
+    </MudSimpleTable>
+
+    <MudButton OnClick="@(() =>_valuesChecked = false)">Назад</MudButton>
+    <MudButton Link="/buy/" Color="Color.Success" OnClick="Buy">Заказать!</MudButton>
+}
+
+@code
+{
+    private string _name;
+
+    private string _phone;
+
+    private string _region;
+
+    private string _sity;
+
+    private string _street;
+
+    private string _house;
+
+    private string _flat;
+
+    private DateTime _daliveryDate = DateTime.Today;
+
+    private BasketItem[] _pens;
+
+    private bool _valuesChecked = false;
+
+    private DeliveryMethod _deliveryMethod = DeliveryMethod.FromMarket;
+
+    private PayMethod _payMethod = PayMethod.CardOnOrdering;
+
+    private int GetCount(int penId)
+    {
+        var pen = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == penId);
+        switch (_sity)
+        {
+            case "Москва":
+                return pen.InMsk;
+            case "Санкт-Петербург":
+                return pen.InSpb;
+            case "Уфа":
+                return pen.InUfa;
+            case "Екатеринбург":
+                return pen.InEkt;
+            case "":
+                return pen.InMsk + pen.InSpb + pen.InEkt + pen.InUfa;
+        }
+        return 0;
+    }
+
+    protected async Task ReadCookies()
+    {
+        var jsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+        _pens = JsonConvert.DeserializeObject<BasketItem[]>(jsonBasket);
+        var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+
+        switch (sity)
+        {
+            case Sity.Mosсow:
+                _sity = "Москва";
+                _region = "Москва";
+                break;
+            case Sity.StPeterburg:
+                _sity = "Санкт-Петербург";
+                _region = "Санкт-Петербург";
+                break;
+            case Sity.Ufa:
+                _sity = "Уфа";
+                _region = "Республика Башкортостан";
+                break;
+            case Sity.Ekaterinburg:
+                _sity = "Екатеринбург";
+                _region = "Свердловская область";
+                break;
+            case Sity.Another:
+                _sity = "";
+                _region = "";
+                break;
+            default:
+                _sity = "";
+                break;
+        }
+    }
+
+    private void ParseDeliveryMethod(string value)
+    {
+        if (value == "Доставка на дом курьером")
+        {
+            if (_sity == "Москва" || _sity == "Санкт-Петербург" ||
+                _sity == "Уфа" || _sity == "Екатеринбург")
+            {
+                _deliveryMethod = DeliveryMethod.OurDeliverer;
+            }
+            else
+            {
+                _deliveryMethod = DeliveryMethod.SdekDeliverer;
+            }
+        }
+        else
+        {
+            _deliveryMethod = EnumParser.ParseDeliveryMethod(value);
+        }
+    }
+
+    private string ToStringDeliveryMethod()
+    {
+        if (_deliveryMethod == DeliveryMethod.OurDeliverer ||
+            _deliveryMethod == DeliveryMethod.SdekDeliverer)
+        {
+            return "Доставка на дом курьером";
+        }
+
+        return EnumParser.ToStringDeliveryMethod(_deliveryMethod);
+    }
+
+    private void ParsePayMethod(string value)
+    {
+        switch (value)
+        {
+            case "Предоплата картой":
+                _payMethod = PayMethod.CardOnOrdering;
+                break;
+            case "Наличными при получении":
+                _payMethod = PayMethod.CashOnTaking;
+                break;
+            case "Картой при получении":
+                _payMethod = PayMethod.CardOnTaking;
+                break;
+            case "Наличными или картой при получении":
+                _payMethod = PayMethod.UnknownOnTaking;
+                break;
+        }
+    }
+
+    private string ToStringPayMethod()
+    {
+        switch (_payMethod)
+        {
+            case PayMethod.CardOnOrdering:
+                return "Предоплата картой";
+            case PayMethod.CashOnTaking:
+                return "Наличными при получении";
+            case PayMethod.CardOnTaking:
+                return "Картой при получении";
+            case PayMethod.UnknownOnTaking:
+                return "Наличными или картой при получении";
+        }
+
+        throw new Exception("Такого не бывает!!!");
+    }
+
+    private void Buy()
+    {
+        InsertLead.Execute(new InsertLead
+        {
+            Lead = new LeadDto
+            {
+                Id = 0,
+                Agreed = true,
+                Payed = false,
+                CostumerId = null,
+                Comment = "",
+                FullPrice = PriceCalculator.CalculateFullPrice(_pens.Select(x =>
+                    new GoodLeadDto
+                    {
+                        Count = x.Count,
+                        Engraving = x.Engraving,
+                        GoodId = x.GoodId
+                    }).ToArray(), _deliveryMethod),
+                CreatingDate = DateTime.Now,
+                CustomerName = _name,
+                CustomerPhone = _phone,
+                Region = _region,
+                Sity = _sity,
+                Street = _street,
+                House = _house,
+                Delivered = false,
+                Goods = _pens.Select(x =>
+                    new GoodLeadDto
+                    {
+                        Count = x.Count,
+                        Engraving = x.Engraving,
+                        GoodId = x.GoodId
+                    }).ToArray(),
+                DeliveryDate = _daliveryDate,
+                DeliveryMethod = _deliveryMethod, 
+                PayMethod = _payMethod,
+                Flat = _flat,
+            }
+        });
+
+         Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", "[]", DateTime.Now.AddYears(10));
+    }
+}
