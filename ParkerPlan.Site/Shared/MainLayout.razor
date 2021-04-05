@@ -1,6 +1,5 @@
 ﻿@using ParkerPlan.Site.Data
 @inherits LayoutComponentBase
-@inject PasswordService PasswordService
 
 
 <MudThemeProvider/>
@@ -31,12 +30,8 @@
     </MudMainContent>
 </MudLayout>
 
-@{
-    var link = $"/admin/{PasswordService.GetPassword()}";
-}
-
-<AdminDialog CorrectPassword="@PasswordService.GetPassword()" Visible="_showDialog" 
-             CloseMe="() => { _showDialog = false; }" OkLink="@link"/>
+<AdminDialog Visible="_showDialog" 
+             CloseMe="() => { _showDialog = false; }"/>
 
 @code {
     bool _drawerOpen = true;

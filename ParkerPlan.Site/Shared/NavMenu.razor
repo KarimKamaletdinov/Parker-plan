@@ -1,4 +1,10 @@
-﻿<MudNavMenu>
+﻿@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions
+@inject IJSRuntime Js
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+
+<MudNavMenu>
     <MudNavLink Href="/home">
         <h4>
             Товары
@@ -9,4 +15,46 @@
             Корзина
         </h4>
     </MudNavLink>
+    @if (_login != null)
+    {
+        if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+        {
+            @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
+            {
+                <MudNavGroup Title="Админ">
+                    <MudNavLink Href="/admin/">
+                        <h4>
+                            Товары
+                        </h4>
+                    </MudNavLink>
+                    <MudNavLink Href="/leads/">
+                        <h4>
+                            Заявки
+                        </h4>
+                    </MudNavLink>
+                </MudNavGroup>
+            }
+        }
+    }
 </MudNavMenu>
+
+@code
+{
+    private string _login;
+
+    private string _password;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+    protected async Task ReadCookies()
+    {
+        _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        StateHasChanged();
+    }
+}

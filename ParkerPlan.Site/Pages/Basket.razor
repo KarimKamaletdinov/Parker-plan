@@ -14,7 +14,7 @@
 @inject IHttpContextAccessor Context
 @inject PriceCalculatorService PriceCalculator
 @*<MudButton OnClick="WriteCookies">обновить куки</MudButton>*@
-<MudButton OnClick="ReadCookies">Показать корзину</MudButton>
+@*<MudButton OnClick="ReadCookies">Показать корзину</MudButton>*@
 
 @if (_pens != null && _pens.Length > 0)
 {
@@ -84,7 +84,13 @@ else if (_pens != null)
 }
 else
 {
-    <MudText Align="Align.Center" Typo="Typo.h3">Нажмите"Показать корзину"</MudText>
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        Загрузка
+    </MudText>
+
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+    </MudText>
 }
 
 
@@ -95,6 +101,13 @@ else
     private string JsonBasket { get; set; }
 
     private BasketItem[] _pens;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
 
     private void ChangeCount(int id, int val)
     {
@@ -169,6 +182,8 @@ else
                 _sity = "Другой";
                 break;
         }
+
+        StateHasChanged();
     }
 
     private void Delete(int id)

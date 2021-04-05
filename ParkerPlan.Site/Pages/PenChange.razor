@@ -1,26 +1,65 @@
-﻿@page "/pen/{id:int}/change/{password}"
-@using ParkerPlan.Site.Data
-@using System.Diagnostics.Eventing.Reader
-@inject PasswordService Service
+﻿@page "/pen/{id:int}/change/"
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject IJSRuntime Js
 
-@if (Password == Service.GetPassword())
+@if (_login != null)
 {
-    <PenChangeComponent Id="@Id" />
-
-    
+    @if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+    {
+        if (GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password == _password)
+        {
+            <PenChangeComponent Id="@Id" />
+        }
+        else
+        {
+            <MudText Align="Align.Center" Typo="Typo.h3" Color="Color.Error">
+                Неверное имя пользователя или пароль!!!
+            </MudText>
+        }
+    }
+    else
+    {
+        <MudText Align="Align.Center" Typo="Typo.h3" Color="Color.Error">
+            Неверное имя пользователя или пароль!!!
+        </MudText>
+    }
 }
 else
-{ 
-    <MudText Color="Color.Error" Align="Align.Center" Typo="Typo.h1">
-        Неправильный пароль!!!!!
+{
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        Загрузка
+    </MudText>
+
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
     </MudText>
 }
+
 
 @code
 {
     [ParameterAttribute]
     public int Id { get; set; }
 
-    [ParameterAttribute]
-    public string Password { get; set; }
+    private string _login;
+
+    private string _password;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+
+    protected async Task ReadCookies()
+    {
+        _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        StateHasChanged();
+    }
 }

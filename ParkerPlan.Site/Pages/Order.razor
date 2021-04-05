@@ -14,7 +14,7 @@
 
 <MudButton Link="/basket/">Назад к корзине</MudButton>
 
-<MudButton OnClick="ReadCookies">Оформить заказ</MudButton>
+@*<MudButton OnClick="ReadCookies">Оформить заказ</MudButton>*@
 
 @if (!_valuesChecked && _pens != null)
 {
@@ -24,179 +24,187 @@
         <MudTextField Value="_phone" ValueChanged="@((string phone) => { _phone = phone; })"
                       HelperText="Номер телефона" />
         <MudTextField Value="_region" ValueChanged="@((string region) => { _region = region; })"
-                      HelperText="Регион"/>
+                      HelperText="Регион" />
         <MudTextField Value="_sity" ValueChanged="@((string sity) => { _sity = sity; })"
-                      HelperText="Город"/>
+                      HelperText="Город" />
         <MudTextField Value="_street" ValueChanged="@((string street) => { _street = street; })"
-                      HelperText="Улица"/>
+                      HelperText="Улица" />
         <MudTextField Value="_house" ValueChanged="@((string house) => { _house = house; })"
-                      HelperText="Дом"/>
+                      HelperText="Дом" />
         <MudTextField Value="_flat" ValueChanged="@((string flat) => { _flat = flat; })"
-                      HelperText="Квартира"/>
-        <MudDatePicker @bind-value="@_daliveryDate" HelperText="Когда вам удобно забрать заказ?"/>
+                      HelperText="Квартира" />
+        <MudDatePicker @bind-value="@_daliveryDate" HelperText="Когда вам удобно забрать заказ?" />
         <MudSelect Value="@ToStringDeliveryMethod()" OffsetY="true"
                    ValueChanged="@((string value) => ParseDeliveryMethod(value))"
                    HelperText="Как вам удобно получить заказ?">
             @if (_sity == "Москва" || _sity == "Санкт-Петербург" ||
-                _sity == "Уфа" || _sity == "Екатеринбург")
+               _sity == "Уфа" || _sity == "Екатеринбург")
             {
-                <MudSelectItem Value="@EnumParser.ToStringDeliveryMethod(DeliveryMethod.FromMarket)"/>
+                <MudSelectItem Value="@EnumParser.ToStringDeliveryMethod(DeliveryMethod.FromMarket)" />
             }
             else
             {
-                <MudSelectItem Value="@EnumParser.ToStringDeliveryMethod(DeliveryMethod.FromSdek)"/>
+                <MudSelectItem Value="@EnumParser.ToStringDeliveryMethod(DeliveryMethod.FromSdek)" />
             }
-            <MudSelectItem Value="@("Доставка на дом курьером")"/>
+            <MudSelectItem Value="@("Доставка на дом курьером")" />
         </MudSelect>
         <MudSelect Value="@ToStringPayMethod()" OffsetY="true"
                    ValueChanged="@((string value) => ParsePayMethod(value))"
                    HelperText="Как вам удобно оплатить заказ?">
-            <MudSelectItem Value="@("Предоплата картой")"/>
+            <MudSelectItem Value="@("Предоплата картой")" />
             @if (_pens.All(x => String.IsNullOrEmpty(x.Engraving)))
             {
-                <MudSelectItem Value="@("Наличными при получении")"/>
-                <MudSelectItem Value="@("Картой при получении")"/>
-                <MudSelectItem Value="@("Наличными или картой при получении")"/>
+                <MudSelectItem Value="@("Наличными при получении")" />
+                <MudSelectItem Value="@("Картой при получении")" />
+                <MudSelectItem Value="@("Наличными или картой при получении")" />
             }
         </MudSelect>
     </MudPaper>
 
     <MudButton OnClick="@(() => _valuesChecked = true)">Далее</MudButton>
 }
-else if(_pens != null)
+else if (_pens != null)
 {
     <MudSimpleTable Hover="true">
         <thead>
-        <tr>
-            <th>
-                Наименование
-            </th>
-            <th>
-                Цена
-            </th>
-            <th>
-                Кол-во
-            </th>
-            <th>
-                Стоимость
-            </th>
-        </tr>
+            <tr>
+                <th>
+                    Наименование
+                </th>
+                <th>
+                    Цена
+                </th>
+                <th>
+                    Кол-во
+                </th>
+                <th>
+                    Стоимость
+                </th>
+            </tr>
         </thead>
         <tbody>
-        @foreach(var pen in _pens)
-        {
-            var good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == pen.GoodId);
+            @foreach (var pen in _pens)
+            {
+                var good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == pen.GoodId);
 
-            <tr>
-                <td>
-                    @good.Name
-                </td>
-                <td>
-                    @good.Price
-                </td>
-                <td>
-                    @pen.Count
-                </td>
-                <td>
-                    @(good.Price * pen.Count)
-                </td>
-            </tr>
-        }
-        @foreach (var pen in _pens.Where(x => !string.IsNullOrEmpty(x.Engraving)))
-        {
-            <tr>
-                <td>
-                    Гравировка "@pen.Engraving"
-                </td>
-                <td>
-                    @PriceCalculator.GetEngravingPrice()
-                </td>
-                <td>
-                    @pen.Count
-                </td>
-                <td>
-                    @(PriceCalculator.GetEngravingPrice() * pen.Count)
-                </td>
-            </tr>
-        }
-        @if (_deliveryMethod == DeliveryMethod.FromSdek)
-        {
-            <tr>
-                <td>
-                    Доставка СДЕК из пункта выдачи
-                </td>
-                <td>
-                    @PriceCalculator.GetFromSdekPrice()
-                </td>
-                <td>
-                    @(1)
-                </td>
-                <td>
-                    @PriceCalculator.GetFromSdekPrice()
-                </td>
-            </tr>
-        }
-        @if (_deliveryMethod == DeliveryMethod.SdekDeliverer)
-        {
-            <tr>
-                <td>
-                    Доставка СДЕК курьером до двери
-                </td>
-                <td>
-                    @PriceCalculator.GetSdekDelivererPrice()
-                </td>
-                <td>
-                    @(1)
-                </td>
-                <td>
-                    @PriceCalculator.GetSdekDelivererPrice()
-                </td>
-            </tr>
-        }
-        @if (_deliveryMethod == DeliveryMethod.OurDeliverer)
-        {
-            <tr>
-                <td>
-                    Доставка курьером до двери
-                </td>
-                <td>
-                    @PriceCalculator.GetOurDerlivererPrice()
-                </td>
-                <td>
-                    @(1)
-                </td>
-                <td>
-                    @PriceCalculator.GetOurDerlivererPrice()
-                </td>
-            </tr>
-        }
+                <tr>
+                    <td>
+                        @good.Name
+                    </td>
+                    <td>
+                        @good.Price
+                    </td>
+                    <td>
+                        @pen.Count
+                    </td>
+                    <td>
+                        @(good.Price * pen.Count)
+                    </td>
+                </tr>
+            }
+            @foreach (var pen in _pens.Where(x => !string.IsNullOrEmpty(x.Engraving)))
+            {
+                <tr>
+                    <td>
+                        Гравировка "@pen.Engraving"
+                    </td>
+                    <td>
+                        @PriceCalculator.GetEngravingPrice()
+                    </td>
+                    <td>
+                        @pen.Count
+                    </td>
+                    <td>
+                        @(PriceCalculator.GetEngravingPrice() * pen.Count)
+                    </td>
+                </tr>
+            }
+            @if (_deliveryMethod == DeliveryMethod.FromSdek)
+            {
+                <tr>
+                    <td>
+                        Доставка СДЕК из пункта выдачи
+                    </td>
+                    <td>
+                        @PriceCalculator.GetFromSdekPrice()
+                    </td>
+                    <td>
+                        @(1)
+                    </td>
+                    <td>
+                        @PriceCalculator.GetFromSdekPrice()
+                    </td>
+                </tr>
+            }
+            @if (_deliveryMethod == DeliveryMethod.SdekDeliverer)
+            {
+                <tr>
+                    <td>
+                        Доставка СДЕК курьером до двери
+                    </td>
+                    <td>
+                        @PriceCalculator.GetSdekDelivererPrice()
+                    </td>
+                    <td>
+                        @(1)
+                    </td>
+                    <td>
+                        @PriceCalculator.GetSdekDelivererPrice()
+                    </td>
+                </tr>
+            }
+            @if (_deliveryMethod == DeliveryMethod.OurDeliverer)
+            {
+                <tr>
+                    <td>
+                        Доставка курьером до двери
+                    </td>
+                    <td>
+                        @PriceCalculator.GetOurDerlivererPrice()
+                    </td>
+                    <td>
+                        @(1)
+                    </td>
+                    <td>
+                        @PriceCalculator.GetOurDerlivererPrice()
+                    </td>
+                </tr>
+            }
         </tbody>
         <tfoot>
-        <tr>
-            <td>
-                ИТОГО
-            </td>
-            <td>
-                
-            </td>
-            <td>
-                
-            </td>
-            <td>
-                @PriceCalculator.CalculateFullPrice(_pens.Select(x => 
-                    new GoodLeadDto
-                    {
-                        Count = x.Count,
-                        Engraving = x.Engraving,
-                        GoodId = x.GoodId
-                    }).ToArray(), _deliveryMethod)
-            </td>
-        </tr>
+            <tr>
+                <td>
+                    ИТОГО
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                    @PriceCalculator.CalculateFullPrice(_pens.Select(x =>
+                        new GoodLeadDto
+                        {
+                            Count = x.Count,
+                            Engraving = x.Engraving,
+                            GoodId = x.GoodId
+                        }).ToArray(), _deliveryMethod)
+                </td>
+            </tr>
         </tfoot>
     </MudSimpleTable>
 
     <MudButton OnClick="@(() =>_valuesChecked = false)">Назад</MudButton>
     <MudButton Link="/buy/" Color="Color.Success" OnClick="Buy">Заказать!</MudButton>
+}
+else
+{
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        Загрузка
+    </MudText>
+
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+    </MudText>
 }
 
 @code
@@ -224,6 +232,13 @@ else if(_pens != null)
     private DeliveryMethod _deliveryMethod = DeliveryMethod.FromMarket;
 
     private PayMethod _payMethod = PayMethod.CardOnOrdering;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
 
     private int GetCount(int penId)
     {
@@ -276,6 +291,8 @@ else if(_pens != null)
                 _sity = "";
                 break;
         }
+
+        StateHasChanged();
     }
 
     private void ParseDeliveryMethod(string value)
@@ -379,12 +396,12 @@ else if(_pens != null)
                         GoodId = x.GoodId
                     }).ToArray(),
                 DeliveryDate = _daliveryDate,
-                DeliveryMethod = _deliveryMethod, 
+                DeliveryMethod = _deliveryMethod,
                 PayMethod = _payMethod,
                 Flat = _flat,
             }
         });
 
-         Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", "[]", DateTime.Now.AddYears(10));
+        Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", "[]", DateTime.Now.AddYears(10));
     }
 }
