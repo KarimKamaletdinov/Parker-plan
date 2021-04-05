@@ -25,6 +25,7 @@ namespace ParkerPlan.CommandHandlers.Worker
                 Patronymic = command.Worker.Patronymic,
                 Position = command.Worker.Position,
                 Surname = command.Worker.Surname,
+                Login = command.Worker.Login
             });
         }
     }
