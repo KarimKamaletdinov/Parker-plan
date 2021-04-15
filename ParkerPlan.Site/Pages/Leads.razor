@@ -8,13 +8,18 @@
 @inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
 @inject IJSRuntime Js
 
+<MudSelect Value="_value" ValueChanged="(string s) => _value = s">
+    <MudSelectItem Value="@("Только текущие")" />
+    <MudSelectItem Value="@("Все")" />
+</MudSelect>
+
 @if (_login != null)
 {
     @if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
     {
         @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
         {
-            <MudTable Items="@GetLeads.Execute(new GetLeads())">
+            <MudTable Items="@GetLeads.Execute(new GetLeads())" Filter="Filter">
                 <HeaderContent>
                     <MudTh>Имя получателя</MudTh>
                     <MudTh>Телефон</MudTh>
@@ -65,6 +70,8 @@ else
 
     private string _password;
 
+    private string _value;
+
     protected override void OnInitialized()
     {
         ReadCookies();
@@ -78,5 +85,15 @@ else
         _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
         _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
         StateHasChanged();
+    }
+
+    private bool Filter(LeadDto arg)
+    {
+        if (_value == "Только текущие")
+        {
+            return !arg.Delivered || !arg.Payed;
+        }
+
+        return true;
     }
 }
