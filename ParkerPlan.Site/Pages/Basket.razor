@@ -9,6 +9,7 @@
 @using System.Net
 @using System.Threading
 @using Microsoft.AspNetCore.Http
+@using MudBlazor.Extensions
 @using ParkerPlan.Site.Data
 @inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
@@ -18,7 +19,7 @@
 @*<MudButton OnClick="WriteCookies">обновить куки</MudButton>*@
 @*<MudButton OnClick="ReadCookies">Показать корзину</MudButton>*@
 
-@if ((_pens != null && _pens.Length > 0) && _sity != "")
+@if (_pens != null && _pens.Length > 0)
 {
     <MudText Align="Align.Center" Typo="Typo.h4">
         Ваш город: @_sity
@@ -179,64 +180,67 @@ else
 
     protected async Task ReadCookies()
     {
-            JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
-            _pens = JsonConvert.DeserializeObject<BasketItem[]>(
-                await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket"));
-            var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+        JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+        _pens = JsonConvert.DeserializeObject<BasketItem[]>(
+            await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket"));
+        var sity = (await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity")).ToLower();
 
-            switch (sity)
-            {
-                case Sity.Mosсow:
-                    _sity = "Москва";
-                    break;
-                case Sity.StPeterburg:
-                    _sity = "Санкт-Петербург";
-                    break;
-                case Sity.Ufa:
-                    _sity = "Уфа";
-                    break;
-                case Sity.Ekaterinburg:
-                    _sity = "Екатеринбург";
-                    break;
-                case Sity.Another:
-                    _sity = "Другой";
-                    break;
-                default:
-                    _sity = "Другой";
-                    break;
-            }
-            if (JsonBasket == null)
-            {
-                JsonBasket = Http.HttpContext.Request.Cookies["basket"];
-                _pens = JsonConvert.DeserializeObject<BasketItem[]>(Http.HttpContext.Request.Cookies["basket"]);
-            }
-            if (_sity == null)
-            {
-                sity = Enum.Parse<Sity>(Http.HttpContext.Request.Cookies["sity"]);
+        if (sity == "moscow")
+        {
+            _sity = "Москва";
+        }
+        else if (sity == "stpeterburg")
+        {
+            _sity = "Санкт-Петербург";
+        }
+        else if (sity == "ufa")
+        {
+            _sity = "Уфа";
+        }
+        else if (sity == "ekaterinburg")
+        {
+            _sity = "Екатеринбург";
+        }
+        else if (sity == "another")
+        {
+            _sity = "Другой";
+        }
+        else
+        {
+            _sity = "Другой";
+        }
+    //if (JsonBasket == null)
+        //{
+        //    JsonBasket = Http.HttpContext.Request.Cookies["basket"];
+        //    _pens = JsonConvert.DeserializeObject<BasketItem[]>(Http.HttpContext.Request.Cookies["basket"]);
+        //}
+        //if (_sity == null)
+        //{
+        //    sity = Enum.Parse<Sity>(Http.HttpContext.Request.Cookies["sity"]);
 
-                switch (sity)
-                {
-                    case Sity.Mosсow:
-                        _sity = "Москва";
-                        break;
-                    case Sity.StPeterburg:
-                        _sity = "Санкт-Петербург";
-                        break;
-                    case Sity.Ufa:
-                        _sity = "Уфа";
-                        break;
-                    case Sity.Ekaterinburg:
-                        _sity = "Екатеринбург";
-                        break;
-                    case Sity.Another:
-                        _sity = "Другой";
-                        break;
-                    default:
-                        _sity = "Другой";
-                        break;
-                }
-            }
-        _finished = true;
+        //    switch (sity)
+        //    {
+        //        case Sity.Mosсow:
+        //            _sity = "Москва";
+        //            break;
+        //        case Sity.StPeterburg:
+        //            _sity = "Санкт-Петербург";
+        //            break;
+        //        case Sity.Ufa:
+        //            _sity = "Уфа";
+        //            break;
+        //        case Sity.Ekaterinburg:
+        //            _sity = "Екатеринбург";
+        //            break;
+        //        case Sity.Another:
+        //            _sity = "Другой";
+        //            break;
+        //        default:
+        //            _sity = "Другой";
+        //            break;
+        //    }
+        //}
+        //_finished = true;
 
         StateHasChanged();
     }
