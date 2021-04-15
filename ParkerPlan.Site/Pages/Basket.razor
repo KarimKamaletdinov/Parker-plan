@@ -5,16 +5,19 @@
 @using ParkerPlan.Abstractions.Dtos
 @using Newtonsoft.Json
 @using ParkerPlan.Abstractions.Enums
-@using Microsoft.AspNetCore.Http
 @using System.Diagnostics.Eventing.Reader
+@using System.Net
+@using System.Threading
+@using Microsoft.AspNetCore.Http
+@using MudBlazor.Extensions
 @using ParkerPlan.Site.Data
 @inject IQueryHandler<GetCostumers, CostumerDto[]> GetCostumers
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject IJSRuntime Js
-@inject IHttpContextAccessor Context
+@inject IHttpContextAccessor Http
 @inject PriceCalculatorService PriceCalculator
 @*<MudButton OnClick="WriteCookies">обновить куки</MudButton>*@
-<MudButton OnClick="ReadCookies">Показать корзину</MudButton>
+@*<MudButton OnClick="ReadCookies">Показать корзину</MudButton>*@
 
 @if (_pens != null && _pens.Length > 0)
 {
@@ -78,14 +81,36 @@
         <MudButton Link="/order/">Оформить заказ</MudButton>
     </MudPaper>
 }
-else if (_pens != null)
+else
 {
     <MudText Align="Align.Center" Typo="Typo.h3">Корзина пуста</MudText>
 }
-else
-{
-    <MudText Align="Align.Center" Typo="Typo.h3">Нажмите"Показать корзину"</MudText>
-}
+@*else if (_finished)
+    {
+        _pens = new BasketItem[0];
+        WriteCookies();
+    }
+    else
+    {
+        <MudText Align="Align.Center" Typo="Typo.h3">
+            Загрузка
+        </MudText>
+
+        <MudText Align="Align.Center" Typo="Typo.h3">
+            <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+        </MudText>
+
+                            //if (_startTime.AddSeconds(1) > DateTime.Now)
+                            //{
+                            //    Thread.Sleep(100);
+                            //    StateHasChanged();
+                            //}
+                            //else
+                            //{
+                            //    _finished = true;
+                            //    StateHasChanged();
+                            //}
+                        }*@
 
 
 @code
@@ -95,6 +120,17 @@ else
     private string JsonBasket { get; set; }
 
     private BasketItem[] _pens;
+
+    private bool _finished;
+
+    private DateTime _startTime;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
 
     private void ChangeCount(int id, int val)
     {
@@ -145,30 +181,68 @@ else
     protected async Task ReadCookies()
     {
         JsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
-        _pens = JsonConvert.DeserializeObject<BasketItem[]>(JsonBasket);
-        var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+        _pens = JsonConvert.DeserializeObject<BasketItem[]>(
+            await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket"));
+        var sity = (await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity")).ToLower();
 
-        switch (sity)
+        if (sity == "moscow")
         {
-            case Sity.Mosсow:
-                _sity = "Москва";
-                break;
-            case Sity.StPeterburg:
-                _sity = "Санкт-Петербург";
-                break;
-            case Sity.Ufa:
-                _sity = "Уфа";
-                break;
-            case Sity.Ekaterinburg:
-                _sity = "Екатеринбург";
-                break;
-            case Sity.Another:
-                _sity = "Другой";
-                break;
-            default:
-                _sity = "Другой";
-                break;
+            _sity = "Москва";
         }
+        else if (sity == "stpeterburg")
+        {
+            _sity = "Санкт-Петербург";
+        }
+        else if (sity == "ufa")
+        {
+            _sity = "Уфа";
+        }
+        else if (sity == "ekaterinburg")
+        {
+            _sity = "Екатеринбург";
+        }
+        else if (sity == "another")
+        {
+            _sity = "Другой";
+        }
+        else
+        {
+            _sity = "Другой";
+        }
+    //if (JsonBasket == null)
+        //{
+        //    JsonBasket = Http.HttpContext.Request.Cookies["basket"];
+        //    _pens = JsonConvert.DeserializeObject<BasketItem[]>(Http.HttpContext.Request.Cookies["basket"]);
+        //}
+        //if (_sity == null)
+        //{
+        //    sity = Enum.Parse<Sity>(Http.HttpContext.Request.Cookies["sity"]);
+
+        //    switch (sity)
+        //    {
+        //        case Sity.Mosсow:
+        //            _sity = "Москва";
+        //            break;
+        //        case Sity.StPeterburg:
+        //            _sity = "Санкт-Петербург";
+        //            break;
+        //        case Sity.Ufa:
+        //            _sity = "Уфа";
+        //            break;
+        //        case Sity.Ekaterinburg:
+        //            _sity = "Екатеринбург";
+        //            break;
+        //        case Sity.Another:
+        //            _sity = "Другой";
+        //            break;
+        //        default:
+        //            _sity = "Другой";
+        //            break;
+        //    }
+        //}
+        //_finished = true;
+
+        StateHasChanged();
     }
 
     private void Delete(int id)

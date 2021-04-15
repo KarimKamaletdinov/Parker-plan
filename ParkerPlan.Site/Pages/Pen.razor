@@ -10,7 +10,9 @@
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject PasswordService Service
 @inject IHttpContextAccessor Http
+@*<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
 
+    </MudContainer>*@
 @{
     _good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == Id);
 }
@@ -20,8 +22,9 @@
     }
     <MudGrid>
         <MudItem xs="6">
+            <MudLink Href="/home">Назад к ассортименту</MudLink>
             <MudPaper Elevation="2" Class="pa-4">
-                <img src=@imgUrl />
+                <img src=@imgUrl/>
             </MudPaper>
         </MudItem>
         <MudItem xs="6">
@@ -96,12 +99,6 @@
         </MudPaper>*@
 </MudContainer>
 
-@{
-    var link = $"/pen/{Id}/change/{Service.GetPassword()}";
-}
-<AdminDialog Visible="@_showDialog" CorrectPassword="@Service.GetPassword()" CloseMe="() => _showDialog = false"
-             OkLink="@link" />
-
 @code
 {
     [ParameterAttribute]
@@ -109,43 +106,70 @@
 
     private GoodDto _good;
 
-    private bool _showDialog;
-
     private async Task AddToBasket()
     {
-        var basketStr = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
+        var basket = new List<BasketItem>();
 
-        var basket = JsonConvert.DeserializeObject<List<BasketItem>>(basketStr);
-
-        var id = Check();
-
-        int Check()
+        try
         {
-            var i = 0;
+            var basketStr = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
 
-            while (basket.Any(x => x.Id == i))
+            basket = JsonConvert.DeserializeObject<List<BasketItem>>(basketStr);
+
+            var id = Check();
+
+            int Check()
             {
-                i++;
+                var i = 0;
+
+                while (basket.Any(x => x.Id == i))
+                {
+                    i++;
+                }
+
+                return i;
             }
 
-            return i;
+            basket.Add(new BasketItem()
+            {
+
+                GoodId = _good.ParkerId,
+                Engraving = null,
+                Count = 1,
+                Id = id
+            });
+        }
+        catch
+        {
+            basket = new List<BasketItem>();
+
+            basket.Add(new BasketItem()
+            {
+
+                GoodId = _good.ParkerId,
+                Engraving = null,
+                Count = 1,
+                Id = 0
+            });
         }
 
-        basket.Add(new BasketItem()
+        try
         {
-
-            GoodId = _good.ParkerId,
-            Engraving = null,
-            Count = 1,
-            Id = id
-        });
+            var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+        }
+        catch
+        {
+            await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "sity", "Moscow",
+                DateTime.Now.AddYears(10).DayOfYear);
+            Http.HttpContext.Request.Cookies.Append(new("sity", "Moscow"));
+        }
 
         var newBasketStr = JsonConvert.SerializeObject(basket);
 
-        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", newBasketStr,
-            DateTime.Now.AddYears(10).DayOfYear);
+        Http.HttpContext.Request.Cookies.Append(new("basket", newBasketStr));
 
-        Http.HttpContext.Request.Cookies.Append(new ("basket", newBasketStr));
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", newBasketStr,
+        DateTime.Now.AddYears(10).DayOfYear);
     }
 
     private async Task DeleteFromBasket()
@@ -164,7 +188,7 @@
         await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", newBasketStr,
             DateTime.Now.AddYears(10).DayOfYear);
 
-        Http.HttpContext.Request.Cookies.Append(new ("basket", newBasketStr));
+        Http.HttpContext.Request.Cookies.Append(new("basket", newBasketStr));
     }
 }
 

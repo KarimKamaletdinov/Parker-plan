@@ -10,5 +10,6 @@
         public string Position { get; set; }
         public string Password { get; set; }
         public int[] MyLeadIds { get; set; }
+        public string Login { get; set; }
     }
 }

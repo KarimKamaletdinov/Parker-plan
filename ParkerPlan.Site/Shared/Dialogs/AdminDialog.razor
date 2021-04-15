@@ -1,21 +1,24 @@
-﻿<MudDialog IsVisible="Visible">
+﻿@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions
+@inject IJSRuntime Js
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+
+
+<MudDialog IsVisible="Visible">
     <DialogContent>
         <MudText Typo="Typo.h4">
-            Введите пароль
+            @_message
         </MudText>
-        <MudDivider/>
-        @{
-            var helperText = _pwdCorrect ? "Пароль верный" : "Неправильный пароль";
-        }
-        <MudTextField @bind-Value="@_wrtnPwd" HelperText="@helperText" />
+        <MudTextField @bind-Value="@_wrtnLogin" HelperText="@("Введите логин")"/>
+        <MudDivider />
+        <MudTextField @bind-Value="@_wrtnPwd" HelperText="@("Введите пароль")"/>
     </DialogContent>
-    
+
     <DialogActions>
-        <a href="@OkLink">
-            <MudButton Disabled="!_pwdCorrect" Link="@this.OkLink">
-                OK
-            </MudButton>
-        </a>
+        <MudButton OnClick="OkClicked">
+            OK
+        </MudButton>
         <MudButton OnClick="CloseMe">
             Cancel
         </MudButton>
@@ -27,30 +30,51 @@
     public bool Visible { get; set; }
 
     [Parameter]
-    public string CorrectPassword { get; set; }
-
-    [Parameter]
-    public string OkLink { get; set; }
-
-    [Parameter]
     public EventCallback CloseMe { get; set; } = new();
 
-    private bool _pwdCorrect;
-    private string _wrtnPwd1 = "";
+    private string _message = "Введите логин и пароль";
 
-    private string _wrtnPwd
+    private string _wrtnLogin;
+
+    private string _wrtnPwd;
+
+
+    private void OkClicked()
     {
-        get => _wrtnPwd1;
-        set
-        {
-            _wrtnPwd1 = value;
+        var workers = GetWorkers.Execute(new GetWorkers());
 
-            WrittenPwdChanged();
+        if (workers.Any(x => x.Login == _wrtnLogin))
+        {
+            if(_wrtnPwd == workers.First(x => x.Login == _wrtnLogin).Password)
+            {
+                WriteCookies();
+                Visible = false;
+                return;
+            }
         }
+
+        _message = "Неверный логин или пароль!";
     }
 
-    private void WrittenPwdChanged()
+    protected override void OnInitialized()
     {
-        _pwdCorrect = CorrectPassword == _wrtnPwd;
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+    protected async Task ReadCookies()
+    {
+        _wrtnLogin = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _wrtnPwd = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        StateHasChanged();
+    }
+
+    protected async Task WriteCookies()
+    {
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "login", _wrtnLogin,
+            DateTime.Now.AddYears(10));
+        await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "password", _wrtnPwd,
+            DateTime.Now.AddYears(10));
     }
 }

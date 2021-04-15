@@ -7,7 +7,6 @@
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject ICommandHandler<UpdateGood> UpdateGood
 @inject ICommandHandler<DeleteGood> DeleteGood
-@inject PasswordService Service
 @inject ISnackbar Snackbar
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
@@ -92,7 +91,7 @@
     </MudPaper>
 </MudContainer>
 @{
-    var link = $"/admin/{Service.GetPassword()}";
+    var link = "/admin/";
 
     var saveIcon = Icons.Material.Rounded.Save;
 

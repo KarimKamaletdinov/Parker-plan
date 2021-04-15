@@ -34,7 +34,7 @@
             }
         }
         window.ReadCookie = {
-            ReadCookie: function (cname) {
+            ReadCookie: function (cname, cdefval) {
                 var name = cname + "=";
                 var decodedCookie = decodeURIComponent(document.cookie);
                 var ca = decodedCookie.split(';');
@@ -47,7 +47,11 @@
                         return c.substring(name.length, c.length);
                     }
                 }
-                return "";
+
+                if (cdefval != null) {
+                    return cdefval;
+                }
+                return"";
             }
         }
     </script>

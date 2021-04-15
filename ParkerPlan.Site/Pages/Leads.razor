@@ -1,35 +1,81 @@
-﻿@page "/leads/{Password}"
+﻿@page "/leads/"
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Site.Data
+@using Newtonsoft.Json
 @inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
-@inject PasswordService Service
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject IJSRuntime Js
 
-@if (Password == Service.GetPassword())
+@if (_login != null)
 {
-    <MudTable Items="@GetLeads.Execute(new GetLeads())">
-        <HeaderContent>
-            <MudTh>Имя получателя</MudTh>
-            <MudTh>Телефон</MudTh>
-            <MudTh>Дата доставки</MudTh>
-            <MudTh>Стоимость</MudTh>
-            <MudTh>...</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Имя получателя">@context.CustomerName</MudTd>
-            <MudTd DataLabel="Телефон">@context.CustomerPhone</MudTd>
-            <MudTd DataLabel="Дата доставки">@context.DeliveryDate.ToLongDateString()</MudTd>
-            <MudTd DataLabel="Стоимость">@context.FullPrice</MudTd>
-            <MudTd DataLabel="...">
-                <MudButton Link="@($"/lead/{context.Id}/{Password}")" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
+    @if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+    {
+        @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
+        {
+            <MudTable Items="@GetLeads.Execute(new GetLeads())">
+                <HeaderContent>
+                    <MudTh>Имя получателя</MudTh>
+                    <MudTh>Телефон</MudTh>
+                    <MudTh>Дата доставки</MudTh>
+                    <MudTh>Стоимость</MudTh>
+                    <MudTh>...</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Имя получателя">@context.CustomerName</MudTd>
+                    <MudTd DataLabel="Телефон">@context.CustomerPhone</MudTd>
+                    <MudTd DataLabel="Дата доставки">@context.DeliveryDate.ToLongDateString()</MudTd>
+                    <MudTd DataLabel="Стоимость">@context.FullPrice</MudTd>
+                    <MudTd DataLabel="...">
+                        <MudButton Link="@($"/lead/{context.Id}/")"/>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+        else
+        {
+            <MudText Align="Align.Center" Typo="Typo.h3" Color="Color.Error">
+                Неверное имя пользователя или пароль!!!
+            </MudText>
+        }
+    }
+    else
+    {
+        <MudText Align="Align.Center" Typo="Typo.h3" Color="Color.Error">
+            Неверное имя пользователя или пароль!!!
+        </MudText>
+    }
+}
+else
+{
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        Загрузка
+    </MudText>
+
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+    </MudText>
 }
 
 @code
 {
-    [ParameterAttribute]
-    public string Password { get; set; }
+    private string _login;
+
+    private string _password;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+
+    protected async Task ReadCookies()
+    {
+        _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        StateHasChanged();
+    }
 }

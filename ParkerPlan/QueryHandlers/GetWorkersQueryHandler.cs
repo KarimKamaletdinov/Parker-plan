@@ -26,7 +26,8 @@ namespace ParkerPlan.QueryHandlers
                 Password = x.Password,
                 Patronymic = x.Patronymic,
                 Position = x.Position,
-                Surname = x.Surname
+                Surname = x.Surname,
+                Login = x.Login
             }).ToArray();
         }
     }

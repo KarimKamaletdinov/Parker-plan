@@ -1,6 +1,5 @@
 ﻿@page "/"
 @page "/home"
-@page "/admin/{password}"
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions.Queries
@@ -9,9 +8,6 @@
 @using ParkerPlan.Abstractions.Commands.Good
 @using ParkerPlan.Abstractions.Enums
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
-@inject ICommandHandler<InsertGood> InsertGood
-@inject PasswordService PasswordService
-@inject ISnackbar Snackbar
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
@@ -20,11 +16,6 @@
             <MudItem>
                 @{
                     var url = $"/pen/{good.ParkerId}";
-
-                    if (Password != null)
-                    {
-                        url = $"/pen/{good.ParkerId}/change/{Password}";
-                    }
                 }
                 <MudLink Href=@url>
                     <MudPaper Elevation="2" Class="pa-4">
@@ -48,66 +39,3 @@
         }
     </MudGrid>
 </MudContainer>
-
-@if (Password != null)
-{
-    @if (Password == PasswordService.GetPassword())
-    {
-        <MudContainer>
-            <MudPaper>
-                @{
-                    var icon = Icons.Material.Rounded.Add;
-                }
-                <MudButton StartIcon="@icon" OnClick="AddPen">Добавить </MudButton>
-            </MudPaper>
-        </MudContainer>
-    }
-    else
-    {
-        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
-        Snackbar.Add("Неверный пароль!", Severity.Error);
-    }
-}
-
-<AskIntDialog Visible="@_showDialog" Header="Введите код ручки. Его нельзя будет изменить потом." Ok="@Ok" />
-
-@code
-{
-    [ParameterAttribute]
-    public string Password { get; set; } = null;
-
-    private bool _showDialog = false;
-
-    private void AddPen()
-    {
-        _showDialog = true;
-    }
-
-    private void Ok(int value)
-    {
-        _showDialog = false;
-
-        InsertGood.Execute(new InsertGood()
-        {
-            Good = new GoodDto
-            {
-                ParkerId = value,
-                Name = "",
-                Collection = "",
-                AbleForMan = false,
-                AbleForWoman = false,
-                GoldDetails = false,
-                GoldPen = false,
-                WritingNodeType = WritingNodeType.Round,
-                Price = 0,
-                AbleToEngraving = false,
-                Description = null,
-                InSpb = 0,
-                InMsk = 0,
-                InUfa = 0,
-                InEkt = 0,
-                SelfPrice = 0
-            }
-        });
-    }
-}

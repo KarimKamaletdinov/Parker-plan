@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using ParkerPlan.Models;
@@ -34,7 +35,8 @@ namespace ParkerPlan.Repositories
                 password = worker.Password,
                 patronymic = worker.Patronymic,
                 position = worker.Position,
-                surname = worker.Surname
+                surname = worker.Surname,
+                login = worker.Login
             });
 
             var b = new SqlConnection(_connectionString).Query<SqlLeadWorkerDto>("SELECT * FROM " +
@@ -64,7 +66,8 @@ namespace ParkerPlan.Repositories
                 password = worker.Password,
                 patronymic = worker.Patronymic,
                 position = worker.Position,
-                surname = worker.Surname
+                surname = worker.Surname,
+                login = worker.Login
             });
 
             var b = new SqlConnection(_connectionString).Query<SqlLeadWorkerDto>("SELECT * FROM " +
@@ -109,7 +112,8 @@ namespace ParkerPlan.Repositories
                     Patronymic = worker.patronymic,
                     Position = worker.position,
                     Surname = worker.surname,
-                    MyLeadIds = b.Where(x => x.worker_id == worker.id).Select(x => x.lead_id).ToArray()
+                    MyLeadIds = b.Where(x => x.worker_id == worker.id).Select(x => x.lead_id).ToArray(),
+                    Login = worker.login
                 });
             }
 
@@ -128,6 +132,7 @@ namespace ParkerPlan.Repositories
             public string about { get; set; }
             public string position { get; set; }
             public string password { get; set; }
+            public string login { get; set; }
         }
 
 

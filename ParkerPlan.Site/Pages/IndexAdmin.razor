@@ -1,0 +1,143 @@
+﻿@page "/admin/"
+@using ParkerPlan.Abstractions.Commands.Good
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Enums
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Site.Data
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject ICommandHandler<InsertGood> InsertGood
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject ISnackbar Snackbar
+@inject IJSRuntime Js
+
+@if (_password != null)
+{
+    @if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+    {
+        @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
+        {
+            <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+                <MudGrid>
+                    @foreach (var good in GetGoods.Execute(new GetGoods()))
+                    {
+                        <MudItem>
+                            @{
+                                var url = $"/pen/{good.ParkerId}/change/";
+                            }
+                            <MudLink Href=@url>
+                                <MudPaper Elevation="2" Class="pa-4">
+                                    @{
+                                        var name = good.Name;
+                                        var image = $"pens/PEN{good.ParkerId}.bmp";
+                                    }
+                                    <img src=@image>
+                                    <MudText Typo="Typo.h5" Align="Align.Center">
+                                        @name
+                                    </MudText>
+                                    <MudText Align="Align.Center" Typo="Typo.h6">
+                                        <MudChip Color="Color.Default">
+                                            @{ var price = $"{good.Price} руб."; }
+                                            @price
+                                        </MudChip>
+                                    </MudText>
+                                </MudPaper>
+                            </MudLink>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudContainer>
+
+            <MudContainer>
+                <MudPaper>
+                    @{
+                        var icon = Icons.Material.Rounded.Add;
+                    }
+                    <MudButton StartIcon="@icon" OnClick="AddPen">Добавить </MudButton>
+                </MudPaper>
+            </MudContainer>
+        }
+        else
+        {
+            <MudText Align="Align.Center" Typo="Typo.h3" Color="Color.Error">
+                Неверное имя пользователя или пароль!!!
+            </MudText>
+        }
+    }
+    else
+    {
+        <MudText Align="Align.Center" Typo="Typo.h3" Color="Color.Error">
+            Неверное имя пользователя или пароль!!!
+        </MudText>
+    }
+}
+else
+{
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        Загрузка
+    </MudText>
+
+    <MudText Align="Align.Center" Typo="Typo.h3">
+        <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+    </MudText>
+}
+
+<AskIntDialog Visible="@_showDialog" Header="Введите код ручки. Его нельзя будет изменить потом." Ok="@Ok" />
+
+@code
+{
+    private string _login;
+
+    private string _password;
+
+    private bool _showDialog = false;
+
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+
+    protected async Task ReadCookies()
+    {
+        _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        StateHasChanged();
+    }
+
+    private void AddPen()
+    {
+        _showDialog = true;
+    }
+
+    private void Ok(int value)
+    {
+        _showDialog = false;
+
+        InsertGood.Execute(new InsertGood()
+        {
+            Good = new GoodDto
+            {
+                ParkerId = value,
+                Name = "",
+                Collection = "",
+                AbleForMan = false,
+                AbleForWoman = false,
+                GoldDetails = false,
+                GoldPen = false,
+                WritingNodeType = WritingNodeType.Round,
+                Price = 0,
+                AbleToEngraving = false,
+                Description = null,
+                InSpb = 0,
+                InMsk = 0,
+                InUfa = 0,
+                InEkt = 0,
+                SelfPrice = 0
+            }
+        });
+    }
+}
