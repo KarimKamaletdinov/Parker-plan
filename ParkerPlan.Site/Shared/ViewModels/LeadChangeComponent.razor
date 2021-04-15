@@ -1,0 +1,101 @@
+﻿@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Commands.Lead
+@using ParkerPlan.Abstractions.Queries
+@inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
+@inject ICommandHandler<UpdateLead> UpdateLead
+@inject ICommandHandler<DeleteLead> DeleteLead
+@inject ISnackbar Snackbar
+
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <ChangeStringField FieldName="Имя получателя" FieldValue="@(_lead.CustomerName)"
+                           Changed="(v) => _lead.CustomerName = v" />
+        <ChangeStringField FieldName="Телефон получателя" FieldValue="@(_lead.CustomerPhone)"
+                           Changed="(v) => _lead.CustomerPhone = v" />
+        <ChangeStringField FieldName="Регион" FieldValue="@(_lead.Region)"
+                           Changed="(v) => _lead.Region = v" />
+        <ChangeStringField FieldName="Город" FieldValue="@(_lead.Sity)"
+                           Changed="(v) => _lead.Sity = v" />
+        <ChangeStringField FieldName="Улица" FieldValue="@(_lead.Street)"
+                           Changed="(v) => _lead.Street = v" />
+        <ChangeStringField FieldName="Дом" FieldValue="@(_lead.House)"
+                           Changed="(v) => _lead.House = v" />
+        <ChangeStringField FieldName="Квартира" FieldValue="@(_lead.Flat)"
+                           Changed="(v) => _lead.Flat = v" />
+        <ChangeBoolField FieldName="Согласовано" FieldValue="@(_lead.Agreed)"
+                         Changed="(v) => _lead.Agreed = v" />
+        <ChangeBoolField FieldName="Оплачено" FieldValue="@(_lead.Payed)"
+                         Changed="(v) => _lead.Payed = v" />
+        <ChangeBoolField FieldName="Доставлено" FieldValue="@(_lead.Delivered)"
+                         Changed="(v) => _lead.Delivered = v" />
+    </MudPaper>
+</MudContainer>
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+</MudContainer>
+@{
+    var link = "/leads/";
+
+    var saveIcon = Icons.Material.Rounded.Save;
+
+    var deleteIcon = Icons.Material.Rounded.Delete;
+
+    var backIcon = Icons.Material.Rounded.House;
+}
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <div style="display: inline-block; width: 30%">
+            <MudText Align="Align.Left">
+                <MudButton OnClick="Save" Color="Color.Info" StartIcon="@saveIcon">
+                    Coxранить
+                </MudButton>
+            </MudText>
+        </div>
+        <div style="display: inline-block; width: 30%">
+            <MudText Align="Align.Center">
+                <MudButton OnClick="() => { _showDialog = true; }" Color="Color.Error" StartIcon="@deleteIcon">
+                    Удалить
+                </MudButton>
+            </MudText>
+        </div>
+
+        <div style="display: inline-block; width: 29%">
+            <MudText Align="Align.Right">
+                <MudButton Link="@link" StartIcon="@backIcon">
+                    Назад
+                </MudButton>
+            </MudText>
+        </div>
+    </MudPaper>
+</MudContainer>
+<YesNoDialog Ok="@Delete" Text="Удалить заявку?" Visible="@_showDialog" OkLink="@link" />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private LeadDto _lead;
+
+    private bool _showDialog = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _lead = GetLeads.Execute(new GetLeads()).First(x => x.Id == Id);
+    }
+
+    private void Delete()
+    {
+        DeleteLead.Execute(new DeleteLead { LeadId = Id });
+    }
+
+    private void Save()
+    {
+        UpdateLead.Execute(new UpdateLead { Lead = _lead });
+
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        Snackbar.Add("Данные сохранены!", Severity.Info);
+    }
+}

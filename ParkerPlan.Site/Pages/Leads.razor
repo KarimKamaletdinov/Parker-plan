@@ -28,7 +28,8 @@
                     <MudTd DataLabel="Дата доставки">@context.DeliveryDate.ToLongDateString()</MudTd>
                     <MudTd DataLabel="Стоимость">@context.FullPrice</MudTd>
                     <MudTd DataLabel="...">
-                        <MudButton Link="@($"/lead/{context.Id}/")"/>
+                        <MudButton Link="@($"/lead/{context.Id}/")"
+                                   StartIcon="@(Icons.Material.Rounded.MoreHoriz)"/>
                     </MudTd>
                 </RowTemplate>
             </MudTable>

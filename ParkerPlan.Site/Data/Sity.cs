@@ -2,7 +2,7 @@
 {
     public enum Sity
     {
-        Mosсow,
+        Moscow,
         StPeterburg,
         Ufa,
         Ekaterinburg,

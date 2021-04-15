@@ -3,7 +3,7 @@
 @using ParkerPlan.Abstractions.Queries
 @inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
 @inject IJSRuntime Js
-@page "/lead/{Id:int}"
+@page "/lead/{Id:int}/full"
 
 @if (_login != null)
 {
@@ -11,7 +11,7 @@
     {
         @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
         {
-            <LeadComponent Id="@Id"/>
+            <LeadChangeComponent Id="@Id" />
         }
         else
         {

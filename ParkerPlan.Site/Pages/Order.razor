@@ -263,27 +263,27 @@ else
     {
         var jsonBasket = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "basket");
         _pens = JsonConvert.DeserializeObject<BasketItem[]>(jsonBasket);
-        var sity = Enum.Parse<Sity>(await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity"));
+        var sity = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "sity");
 
         switch (sity)
         {
-            case Sity.Mosсow:
+            case "Moscow":
                 _sity = "Москва";
                 _region = "Москва";
                 break;
-            case Sity.StPeterburg:
+            case "StPeterburg":
                 _sity = "Санкт-Петербург";
                 _region = "Санкт-Петербург";
                 break;
-            case Sity.Ufa:
+            case "Ufa":
                 _sity = "Уфа";
                 _region = "Республика Башкортостан";
                 break;
-            case Sity.Ekaterinburg:
+            case "Ekaterinburg":
                 _sity = "Екатеринбург";
                 _region = "Свердловская область";
                 break;
-            case Sity.Another:
+            case "Another":
                 _sity = "";
                 _region = "";
                 break;
@@ -369,7 +369,7 @@ else
             Lead = new LeadDto
             {
                 Id = 0,
-                Agreed = true,
+                Agreed = false,
                 Payed = false,
                 CostumerId = null,
                 Comment = "",

@@ -1,0 +1,193 @@
+﻿@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Commands.Good
+@using ParkerPlan.Abstractions.Commands.Lead
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject ICommandHandler<UpdateLead> UpdateLead
+@inject ICommandHandler<UpdateGood> UpdateGood
+@inject ISnackbar Snackbar
+
+@{
+    _lead = GetLeads.Execute(new GetLeads()).First(x => x.Id == Id);
+}
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem Style="width: 100%">
+            <MudLink Href="@("/leads/")">Назад</MudLink>
+            <MudPaper Elevation="2" Class="pa-4">
+                @{
+                    var address = $"{_lead.Region}, г.{_lead.Sity}, ул.{_lead.Street}, д.{_lead.House}, кв.{_lead.Flat}";
+
+                    var state = "Не согласовано";
+
+                    if (_lead.Agreed)
+                    {
+                        if (_lead.Delivered)
+                        {
+                            if (_lead.Payed)
+                            {
+                                state = "Оплачено, доставлено";
+                            }
+                            else
+                            {
+                                state = "Доставлено, не оплачено";
+                            }
+                        }
+                        else if (_lead.Payed)
+                        {
+                            state = "Оплачено, не доставлено";
+                        }
+                        else
+                        {
+                            state = "Согласовано";
+                        }
+                    }
+                }
+                <FieldRow FieldName="Имя получателя" FieldValue="@(_lead.CustomerName)"/>
+                <FieldRow FieldName="Телефон получателя" FieldValue="@(_lead.CustomerPhone)"/>
+                <FieldRow FieldName="Адрес получателя" FieldValue="@(address)"/>
+                <FieldRow FieldName="Состояние" FieldValue="@(state)"/>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem Style="width: 100%" xs="5">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudTable Items="_lead.Goods">
+                    <HeaderContent>
+                        <MudTh>
+                            Наименование
+                        </MudTh>
+                        <MudTh>
+                            Кол-во
+                        </MudTh>
+                        <MudTh>
+                            Гравировка
+                        </MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @{
+                            var pen = GetGoods.Execute(new GetGoods()).First(x =>
+                                x.ParkerId == context.GoodId);
+                        }
+                        <MudTd DataLabel="Наименование">
+                            @pen.Name
+                        </MudTd>
+                        <MudTd DataLabel="Кол-во">
+                            @context.Count
+                        </MudTd>
+                        <MudTd DataLabel="Гравировка">
+                            @(string.IsNullOrEmpty(context.Engraving) ? "нет" : context.Engraving)
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem Style="width: 100%" xs="5">
+            <MudPaper Elevation="2" Class="pa-4">
+                @if (_lead.Agreed)
+                {
+                    <MudButton StartIcon="@(Icons.Material.Rounded.Cancel)" OnClick="Disagreed"
+                               Color="Color.Error">
+                        Не согласовано!
+                    </MudButton>
+                    if (!_lead.Payed)
+                    {
+                        <MudButton StartIcon="@(Icons.Material.Rounded.Money)" OnClick="Payed"
+                                   Color="Color.Success">
+                            Оплачено!
+                        </MudButton>
+                    }
+                    if (!_lead.Delivered)
+                    {
+                        <MudButton StartIcon="@(Icons.Material.Rounded.HomeWork)" OnClick="Delivered"
+                                   Color="Color.Primary">
+                            Доставлено!
+                        </MudButton>
+                    }
+                }
+                else
+                {
+                    <MudButton StartIcon="@(Icons.Material.Rounded.CheckCircle)" OnClick="Agreed"
+                               Color="Color.Success">
+                        Согласовано!
+                    </MudButton>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem Style="width: 100%" xs="2">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudButton Link="@($"/lead/{Id}/full")" StartIcon="@(Icons.Material.Filled.ModeEdit)"
+                           Color="Color.Warning">
+                    Изменить
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private LeadDto _lead;
+
+    private void Agreed()
+    {
+        _lead.Agreed = true;
+        UpdateLead.Execute(new UpdateLead { Lead = _lead });
+
+        foreach (var rel in _lead.Goods)
+        {
+            var pen = GetGoods.Execute(new GetGoods()).First(x =>
+                x.ParkerId == rel.GoodId);
+            if (_lead.Sity == "Москва")
+            {
+                pen.InMsk -= rel.Count;
+            }
+            else if (_lead.Sity == "Санкт-Петербург")
+            {
+                pen.InSpb -= rel.Count;
+            }
+            else if (_lead.Sity == "Уфа")
+            {
+                pen.InUfa -= rel.Count;
+            }
+            else if (_lead.Sity == "Екатеринбург")
+            {
+                pen.InEkt -= rel.Count;
+            }
+            else
+            {
+                Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+                Snackbar.Add($"Не удалось списать со склада товар {pen.Name} (ID {pen.ParkerId})" +
+                    $"т.к. нет склада в городе {_lead.Sity} и не известно, с какого склада" +
+                    $"требуется их списать!",
+                    Severity.Error);
+            }
+
+            UpdateGood.Execute(new UpdateGood { Good = pen });
+        }
+    }
+
+    private void Payed()
+    {
+        _lead.Payed = true;
+        UpdateLead.Execute(new UpdateLead { Lead = _lead });
+    }
+
+    private void Delivered()
+    {
+        _lead.Delivered = true;
+        UpdateLead.Execute(new UpdateLead { Lead = _lead });
+    }
+
+    private void Disagreed()
+    {
+        _lead.Agreed = false;
+        UpdateLead.Execute(new UpdateLead { Lead = _lead });
+    }
+}
