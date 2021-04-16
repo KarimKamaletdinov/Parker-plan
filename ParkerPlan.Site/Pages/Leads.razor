@@ -4,14 +4,44 @@
 @using ParkerPlan.Abstractions.Queries
 @using ParkerPlan.Site.Data
 @using Newtonsoft.Json
+@using ParkerPlan.Abstractions.Commands.Worker
 @inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
 @inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject ICommandHandler<UpdateWorker> UpdateWorker
+@inject FiltersService Service
 @inject IJSRuntime Js
+@*<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">*@
+<MudPaper Elevation="2" Class="pa-4">
+    <MudSwitch T="bool" @bind-checked="@_current" Label="Только текущие" />
+    <MudSwitch T="bool" @bind-checked="@_my" Label="Только мои" />
+    <MudSwitch T="bool" @bind-checked="@_unagreed" Label="Только несогласованные" />
+    <!--<MudRadioGroup T="bool" @bind-SelectedOption="@_byPrice" Name="Сортировать">
+        <MudRadio Option="true">По цене</MudRadio>
+        <MudRadio Option="false">По дате доставки</MudRadio>
+    </MudRadioGroup>-->
+    @*</MudPaper>
+        <MudPaper Elevation="2" Class="pa-4">*@
+    <!--<MudRadioGroup T="bool" @bind-SelectedOption="@_plus" Name="Сортировать">
+        <MudRadio Option="true">По возрастанию</MudRadio>
+        <MudRadio Option="false">По убыванию</MudRadio>
+    </MudRadioGroup>-->
 
-<MudSelect Value="_value" ValueChanged="(string s) => _value = s">
-    <MudSelectItem Value="@("Только текущие")" />
-    <MudSelectItem Value="@("Все")" />
-</MudSelect>
+    <MudSelect T="bool" @bind-Value="_byPrice"
+               ToStringFunc="@(b => b ? "По цене" : "По дате доставки")"
+               OffsetY="true" FullWidth="false">
+        <MudSelectItem Value="true" />
+        <MudSelectItem Value="false" />
+    </MudSelect>
+
+    <MudSelect T="bool" @bind-Value="_plus"
+               ToStringFunc="@(b => b ? "По возрастанию" : "По убыванию")"
+               OffsetY="true" FullWidth="false">
+        <MudSelectItem Value="true" />
+        <MudSelectItem Value="false" />
+    </MudSelect>
+</MudPaper>
+@*</MudContainer>*@
+
 
 @if (_login != null)
 {
@@ -19,7 +49,13 @@
     {
         @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
         {
-            <MudTable Items="@GetLeads.Execute(new GetLeads())" Filter="Filter">
+            @if (_first)
+            {
+                LoadFilters();
+                _first = false;
+            }
+
+            <MudTable Items="@Sort(GetLeads.Execute(new GetLeads()))" Filter="Filter" SortLabel="Стоимость">
                 <HeaderContent>
                     <MudTh>Имя получателя</MudTh>
                     <MudTh>Телефон</MudTh>
@@ -33,8 +69,22 @@
                     <MudTd DataLabel="Дата доставки">@context.DeliveryDate.ToLongDateString()</MudTd>
                     <MudTd DataLabel="Стоимость">@context.FullPrice</MudTd>
                     <MudTd DataLabel="...">
+                        @{
+                                        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login ==
+_login);
+                        }
                         <MudButton Link="@($"/lead/{context.Id}/")"
-                                   StartIcon="@(Icons.Material.Rounded.MoreHoriz)"/>
+                                   StartIcon="@(Icons.Material.Rounded.MoreHoriz)" />
+                        @if (me.MyLeadIds.All(x => x != context.Id))
+                                    {
+                            <MudButton OnClick="() => MakeMy(context.Id)"
+                                       StartIcon="@(Icons.Material.Rounded.Done)" />
+                                    }
+                                    else
+                                    {
+                            <MudButton OnClick="() => Throw(context.Id)"
+                                       StartIcon="@(Icons.Material.Rounded.NotInterested)" />
+                                    }
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -70,7 +120,17 @@ else
 
     private string _password;
 
-    private string _value;
+    private bool _current;
+
+    private bool _my;
+
+    private bool _unagreed;
+
+    private bool _byPrice;
+
+    private bool _plus;
+
+    private bool _first = true;
 
     protected override void OnInitialized()
     {
@@ -87,13 +147,155 @@ else
         StateHasChanged();
     }
 
+    private void MakeMy(int id)
+    {
+        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
+
+        var all = GetWorkers.Execute(new GetWorkers()).Where(x => x.Login != _login);
+
+        if (all.All(x => x.MyLeadIds.All(y => y != id)))
+        {
+            if (me.MyLeadIds.All(y => y != id))
+            {
+                var list = me.MyLeadIds.ToList();
+                list.Add(id);
+                me.MyLeadIds = list.ToArray();
+                UpdateWorker.Execute(new UpdateWorker { Worker = me });
+            }
+        }
+    }
+
+    private void Throw(int id)
+    {
+        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
+
+        if (me.MyLeadIds.Any(y => y == id))
+        {
+            var list = me.MyLeadIds.ToList();
+            list.Remove(id);
+            me.MyLeadIds = list.ToArray();
+            UpdateWorker.Execute(new UpdateWorker { Worker = me });
+        }
+    }
+
     private bool Filter(LeadDto arg)
     {
-        if (_value == "Только текущие")
+        UpdateFilters();
+
+        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
+
+        if (_current && (arg.Delivered && arg.Payed))
         {
-            return !arg.Delivered || !arg.Payed;
+            return false;
         }
 
+        if (_unagreed && (arg.Agreed))
+        {
+            return false;
+        }
+
+        if (_my && me.MyLeadIds.All(x => x != arg.Id))
+        {
+            return false;
+        }
+
+
         return true;
+    }
+
+    private void UpdateFilters()
+    {
+        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
+
+        Service.Update(me.Login, new Dictionary<string, bool>(
+            new KeyValuePair<string, bool>[]
+            {
+                new("my", _my),
+                new("current", _current),
+                new("unagreed", _unagreed),
+                new("by_price", _byPrice),
+                new("plus", _plus)
+                                }));
+    }
+
+    private void LoadFilters()
+    {
+        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
+
+        try
+        {
+            var filters = Service.GetAll(me.Login);
+
+            _my = filters["my"];
+
+            _current = filters["current"];
+
+            _unagreed = filters["unagreed"];
+
+            _byPrice = filters["by_price"];
+
+            _plus = filters["plus"];
+        }
+        catch (Exception e)
+        {
+            Service.Insert(me.Login, new Dictionary<string, bool>(
+                new KeyValuePair<string, bool>[]
+                {
+                    new("my", false),
+                    new("current", false),
+                    new("unagreed", false),
+                    new("by_price", false),
+                    new("plus", false)
+                                }));
+        }
+    }
+
+    private List<LeadDto> Sort(IEnumerable<LeadDto> before)
+    {
+        var result = new List<LeadDto>();
+
+        var leadDtos = before.ToList();
+
+        while (leadDtos.ToArray().Length > 0)
+        {
+            if (_byPrice)
+            {
+                var max = leadDtos.Max(x => x.FullPrice);
+
+                if (_plus)
+                {
+                    max = leadDtos.Min(x => x.FullPrice);
+                }
+
+                foreach (var lead in leadDtos.ToArray())
+                {
+                    if (lead.FullPrice == max)
+                    {
+                        result.Add(lead);
+                        leadDtos.Remove(lead);
+                    }
+                }
+            }
+            else
+            {
+                var max = leadDtos.Max(x => x.DeliveryDate);
+
+                if (_plus)
+                {
+                    max = leadDtos.Min(x => x.DeliveryDate);
+                }
+
+                foreach (var lead in leadDtos.ToArray())
+                {
+                    if (lead.DeliveryDate == max)
+                    {
+                        result.Add(lead);
+                        leadDtos.Remove(lead);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 }

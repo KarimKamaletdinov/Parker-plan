@@ -15,7 +15,7 @@ namespace ParkerPlan.CommandHandlers.Worker
 
         public void Execute(UpdateWorker command)
         {
-            _repository.Insert(new Models.Worker()
+            _repository.Update(new Models.Worker()
             {
                 About = command.Worker.About,
                 Id = command.Worker.Id,
