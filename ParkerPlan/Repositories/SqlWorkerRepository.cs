@@ -79,7 +79,7 @@ namespace ParkerPlan.Repositories
 
             foreach (var id in worker.MyLeadIds)
             {
-                new SqlConnection(_connectionString).Update(new SqlLeadWorkerDto
+                new SqlConnection(_connectionString).Insert(new SqlLeadWorkerDto
                 {
                     worker_id = worker.Id,
                     lead_id = id

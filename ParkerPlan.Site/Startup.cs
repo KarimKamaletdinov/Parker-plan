@@ -64,6 +64,7 @@ namespace ParkerPlan.Site
             services.AddScoped<PasswordService>();
             services.AddScoped<PriceCalculatorService>();
             services.AddScoped<EnumParser>();
+            services.AddScoped<FiltersService>();
             services.AddHttpContextAccessor();
         }
 

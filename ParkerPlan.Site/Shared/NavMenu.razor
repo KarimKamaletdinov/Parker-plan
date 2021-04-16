@@ -21,7 +21,7 @@
         {
             @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
             {
-                <MudNavGroup Title="Админ">
+                <MudNavGroup Title="Админ" Expanded="true">
                     <MudNavLink Href="/admin/">
                         <h4>
                             Товары
