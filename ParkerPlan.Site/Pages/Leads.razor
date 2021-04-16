@@ -10,37 +10,40 @@
 @inject ICommandHandler<UpdateWorker> UpdateWorker
 @inject FiltersService Service
 @inject IJSRuntime Js
-@*<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">*@
-<MudPaper Elevation="2" Class="pa-4">
-    <MudSwitch T="bool" @bind-checked="@_current" Label="Только текущие" />
-    <MudSwitch T="bool" @bind-checked="@_my" Label="Только мои" />
-    <MudSwitch T="bool" @bind-checked="@_unagreed" Label="Только несогласованные" />
-    <!--<MudRadioGroup T="bool" @bind-SelectedOption="@_byPrice" Name="Сортировать">
-        <MudRadio Option="true">По цене</MudRadio>
-        <MudRadio Option="false">По дате доставки</MudRadio>
-    </MudRadioGroup>-->
-    @*</MudPaper>
-        <MudPaper Elevation="2" Class="pa-4">*@
-    <!--<MudRadioGroup T="bool" @bind-SelectedOption="@_plus" Name="Сортировать">
-        <MudRadio Option="true">По возрастанию</MudRadio>
-        <MudRadio Option="false">По убыванию</MudRadio>
-    </MudRadioGroup>-->
 
-    <MudSelect T="bool" @bind-Value="_byPrice"
-               ToStringFunc="@(b => b ? "По цене" : "По дате доставки")"
-               OffsetY="true" FullWidth="false">
-        <MudSelectItem Value="true" />
-        <MudSelectItem Value="false" />
-    </MudSelect>
+<MudNavGroup Title="Фильтры">
+    <MudPaper Elevation="2" Class="pa-4">
+        <MudGrid>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_current" Label="Только текущие" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_my" Label="Только мои" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_unagreed" Label="Только несогласованные" />
+            </MudItem>
 
-    <MudSelect T="bool" @bind-Value="_plus"
-               ToStringFunc="@(b => b ? "По возрастанию" : "По убыванию")"
-               OffsetY="true" FullWidth="false">
-        <MudSelectItem Value="true" />
-        <MudSelectItem Value="false" />
-    </MudSelect>
-</MudPaper>
-@*</MudContainer>*@
+            <MudItem>
+                <MudSelect T="bool" @bind-Value="_byPrice"
+                           ToStringFunc="@(b => b ? "По цене" : "По дате доставки")"
+                           OffsetY="true" FullWidth="false">
+                    <MudSelectItem Value="true" />
+                    <MudSelectItem Value="false" />
+                </MudSelect>
+            </MudItem>
+
+            <MudItem>
+                <MudSelect T="bool" @bind-Value="_plus"
+                           ToStringFunc="@(b => b ? "По возрастанию" : "По убыванию")"
+                           OffsetY="true" FullWidth="false">
+                    <MudSelectItem Value="true" />
+                    <MudSelectItem Value="false" />
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudNavGroup>
 
 
 @if (_login != null)
@@ -215,7 +218,7 @@ else
                 new("unagreed", _unagreed),
                 new("by_price", _byPrice),
                 new("plus", _plus)
-                                }));
+                                    }));
     }
 
     private void LoadFilters()
@@ -246,7 +249,7 @@ else
                     new("unagreed", false),
                     new("by_price", false),
                     new("plus", false)
-                                }));
+                                    }));
         }
     }
 

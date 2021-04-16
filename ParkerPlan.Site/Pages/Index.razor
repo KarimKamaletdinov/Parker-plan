@@ -2,16 +2,89 @@
 @page "/home"
 @using ParkerPlan.Abstractions
 @using ParkerPlan.Abstractions.Dtos
-@using ParkerPlan.Abstractions.Queries
-@using ParkerPlan.Site.Data
-@using System.Diagnostics.Eventing.Reader
-@using ParkerPlan.Abstractions.Commands.Good
 @using ParkerPlan.Abstractions.Enums
+@using ParkerPlan.Abstractions.Queries
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+
+<MudNavGroup Title="Фильтры">
+    <MudPaper Elevation="2" Class="pa-4">
+        <MudGrid>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_anywhere" Label="В наличии" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_msk" Label="В наличии в Москве" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_spb" Label="В наличии в Санкт-Петербурге" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_ufa" Label="В наличии в Уфе" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_ekt" Label="В наличии в Екатеринбурге" />
+            </MudItem>
+
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_gdetails" Label="Золотые детали" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_gpen" Label="Золотое перо" />
+            </MudItem>
+
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_fman" Label="Подходит для мужчин" />
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_fwoman" Label="Подходит для женщин" />
+            </MudItem>
+
+            <MudItem>
+                <MudSwitch T="bool" @bind-checked="@_eng" Label="Возможна гравировка" />
+            </MudItem>
+
+            <MudItem>
+                <MudSelect T="@(WritingNodeType?)" @bind-Value="_wnt"
+                           ToStringFunc="ToStringWnt"
+                           OffsetY="true" FullWidth="false"
+                           Label="Тип письма">
+                    <MudSelectItem T="@(WritingNodeType?)" Value="WritingNodeType.Roller" />
+                    <MudSelectItem T="@(WritingNodeType?)" Value="WritingNodeType.Pen" />
+                    <MudSelectItem T="@(WritingNodeType?)" Value="WritingNodeType.Round" />
+                    <MudSelectItem T="@(WritingNodeType?)" Value="null" />
+                </MudSelect>
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-Checked="@_usen" Label="По названию" />
+
+                @if (_usen)
+                {
+                    <MudTextField @bind-Value="@_name" />
+                }
+            </MudItem>
+            <MudItem>
+                <MudSwitch T="bool" @bind-Checked="@_usec" Label="По коллекции" />
+
+                @if (_usec)
+                {
+                    <MudTextField @bind-Value="@_col" />
+                }
+            </MudItem>
+            <MudItem>
+                <MudSelect T="bool" @bind-Value="_plus"
+                           ToStringFunc="@(b => b ? "По возрастанию цены" : "По убыванию цены")"
+                           OffsetY="true" FullWidth="false">
+                    <MudSelectItem Value="true" />
+                    <MudSelectItem Value="false" />
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudNavGroup>
 
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     <MudGrid>
-        @foreach (var good in GetGoods.Execute(new GetGoods()))
+        @foreach (var good in Sort(GetGoods.Execute(new GetGoods()).Where(Filter).ToList()))
         {
             <MudItem>
                 @{
@@ -39,3 +112,159 @@
         }
     </MudGrid>
 </MudContainer>
+
+@code
+{
+    private bool _msk = false;
+
+    private bool _spb = false;
+
+    private bool _ufa = false;
+
+    private bool _ekt = false;
+
+    private bool _anywhere = false;
+
+    private bool _gdetails = false;
+
+    private bool _gpen = false;
+
+    private bool _fman = false;
+
+    private bool _fwoman = false;
+
+    private bool _eng = false;
+
+    private WritingNodeType? _wnt = null;
+
+    private bool _price = false;
+
+    private int _minp = 0;
+
+    private int _maxp = 0;
+
+    private bool _usen = false;
+
+    private string _name = "";
+
+    private bool _usec = false;
+
+    private string _col = "";
+
+    private bool _plus;
+
+
+    private bool Filter(GoodDto good)
+    {
+        if (_anywhere && (good.InMsk < 1 && good.InSpb < 1 && good.InUfa < 1 && good.InEkt < 1))
+        {
+            return false;
+        }
+        if (_msk && good.InMsk < 1)
+        {
+            return false;
+        }
+        if (_spb && good.InSpb < 1)
+        {
+            return false;
+        }
+        if (_ufa && good.InUfa < 1)
+        {
+            return false;
+        }
+        if (_ekt && good.InEkt < 1)
+        {
+            return false;
+        }
+        if (_gdetails && !good.GoldDetails)
+        {
+            return false;
+        }
+        if (_gpen && !good.GoldPen)
+        {
+            return false;
+        }
+        if (_fman && !good.AbleForMan)
+        {
+            return false;
+        }
+        if (_fwoman && !good.AbleForWoman)
+        {
+            return false;
+        }
+        if (_eng && !good.AbleToEngraving)
+        {
+            return false;
+        }
+        if (_wnt != null && good.WritingNodeType != _wnt)
+        {
+            return false;
+        }
+        if (_price && (good.Price < _minp || good.Price > _maxp))
+        {
+            return false;
+        }
+        if (_usen && !good.Name.ToLower().Contains(_name.ToLower()))
+        {
+            return false;
+        }
+        if (_usec && !good.Collection.ToLower().Contains(_col.ToLower()))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private string ToStringWnt(WritingNodeType? arg)
+    {
+        switch (arg)
+        {
+            case WritingNodeType.Pen:
+                return "Перьевой";
+            case WritingNodeType.Roller:
+                return "Роллер";
+            case WritingNodeType.Round:
+                return "Шариковый";
+            default:
+                return "Любой";
+        }
+    }
+
+    private List<GoodDto> Sort(List<GoodDto> old)
+    {
+        var result = new List<GoodDto>();
+
+        while (old.Count > 0)
+        {
+            var max = old.Max(x => x.Price);
+
+            if (_plus)
+            {
+                max = old.Min(x => x.Price);
+            }
+
+            foreach (var lead in old.ToArray())
+            {
+                if (lead.Price == max)
+                {
+                    result.Add(lead);
+                    old.Remove(lead);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    protected override void OnInitialized()
+    {
+        var goods = GetGoods.Execute(new GetGoods());
+
+        _minp = goods.Min(x => x.Price);
+
+        _maxp = goods.Max(x => x.Price);
+
+        base.OnInitialized();
+    }
+}

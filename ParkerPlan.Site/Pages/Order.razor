@@ -33,7 +33,7 @@
                       HelperText="Дом" />
         <MudTextField Value="_flat" ValueChanged="@((string flat) => { _flat = flat; })"
                       HelperText="Квартира" />
-        <MudDatePicker @bind-value="@_daliveryDate" HelperText="Когда вам удобно забрать заказ?" />
+        <MudDatePicker @bind-Date="@_daliveryDate" HelperText="Когда вам удобно забрать заказ?" />
         <MudSelect Value="@ToStringDeliveryMethod()" OffsetY="true"
                    ValueChanged="@((string value) => ParseDeliveryMethod(value))"
                    HelperText="Как вам удобно получить заказ?">
