@@ -33,7 +33,7 @@
                       HelperText="Дом" />
         <MudTextField Value="_flat" ValueChanged="@((string flat) => { _flat = flat; })"
                       HelperText="Квартира" />
-        <MudDatePicker @bind-Date="@_daliveryDate" HelperText="Когда вам удобно забрать заказ?" />
+        <MudDatePicker @bind-Date="@_deliveryDate" HelperText="Когда вам удобно забрать заказ?" />
         <MudSelect Value="@ToStringDeliveryMethod()" OffsetY="true"
                    ValueChanged="@((string value) => ParseDeliveryMethod(value))"
                    HelperText="Как вам удобно получить заказ?">
@@ -223,7 +223,7 @@ else
 
     private string _flat;
 
-    private DateTime _daliveryDate = DateTime.Today;
+    private DateTime? _deliveryDate = DateTime.Today;
 
     private BasketItem[] _pens;
 
@@ -395,7 +395,7 @@ else
                         Engraving = x.Engraving,
                         GoodId = x.GoodId
                     }).ToArray(),
-                DeliveryDate = _daliveryDate,
+                DeliveryDate = (DateTime)_deliveryDate,
                 DeliveryMethod = _deliveryMethod,
                 PayMethod = _payMethod,
                 Flat = _flat,

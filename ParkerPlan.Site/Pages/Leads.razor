@@ -10,6 +10,7 @@
 @inject ICommandHandler<UpdateWorker> UpdateWorker
 @inject FiltersService Service
 @inject IJSRuntime Js
+@inject ISnackbar Snackbar
 
 <MudNavGroup Title="Фильтры">
     <MudPaper Elevation="2" Class="pa-4">
@@ -73,21 +74,24 @@
                     <MudTd DataLabel="Стоимость">@context.FullPrice</MudTd>
                     <MudTd DataLabel="...">
                         @{
-                                        var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login ==
-_login);
+                            var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
                         }
                         <MudButton Link="@($"/lead/{context.Id}/")"
                                    StartIcon="@(Icons.Material.Rounded.MoreHoriz)" />
                         @if (me.MyLeadIds.All(x => x != context.Id))
-                                    {
-                            <MudButton OnClick="() => MakeMy(context.Id)"
-                                       StartIcon="@(Icons.Material.Rounded.Done)" />
-                                    }
-                                    else
-                                    {
+                        {
+                            if (GetWorkers.Execute(new GetWorkers()).Where(x => x.Login != _login).
+        All(x => !x.MyLeadIds.Contains(context.Id)))
+                            {
+                                <MudButton OnClick="() => MakeMy(context.Id)"
+                                           StartIcon="@(Icons.Material.Rounded.Done)" />
+                            }
+                        }
+                        else
+                        {
                             <MudButton OnClick="() => Throw(context.Id)"
                                        StartIcon="@(Icons.Material.Rounded.NotInterested)" />
-                                    }
+                        }
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -166,6 +170,11 @@ else
                 UpdateWorker.Execute(new UpdateWorker { Worker = me });
             }
         }
+        //else
+        //{
+        //    Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        //    Snackbar.Add("", Severity.Error);
+        //}
     }
 
     private void Throw(int id)
@@ -218,7 +227,7 @@ else
                 new("unagreed", _unagreed),
                 new("by_price", _byPrice),
                 new("plus", _plus)
-                                    }));
+                                            }));
     }
 
     private void LoadFilters()
@@ -249,7 +258,7 @@ else
                     new("unagreed", false),
                     new("by_price", false),
                     new("plus", false)
-                                    }));
+                                            }));
         }
     }
 

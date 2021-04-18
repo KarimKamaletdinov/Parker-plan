@@ -1,0 +1,90 @@
+﻿@page "/workers/"
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Commands.Worker
+@using ParkerPlan.Abstractions.Dtos
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject ICommandHandler<InsertWorker> InsertWorker
+@inject IJSRuntime Js
+
+
+@if (_login != null)
+{
+    @if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+    {
+        @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
+        {
+            @if (GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Position.ToLower().
+               Contains("Директор".ToLower()))
+            {
+                <MudLink Href="/director/">Назад к панели управления</MudLink>
+
+                <MudText Typo="Typo.h3" Align="Align.Center">Сотрудники фирмы</MudText>
+                <MudTable Items="@(GetWorkers.Execute(new GetWorkers()))">
+                    <HeaderContent>
+                        <MudTh>Фамилия</MudTh>
+                        <MudTh>Имя</MudTh>
+                        <MudTh>Отчество</MudTh>
+                        <MudTh>Должность</MudTh>
+                        <MudTh>Логин</MudTh>
+                        <MudTh>...</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Фамилия">@context.Surname</MudTd>
+                        <MudTd DataLabel="Имя">@context.Name</MudTd>
+                        <MudTd DataLabel="Отчество">@context.Patronymic</MudTd>
+                        <MudTd DataLabel="Должность">@context.Position</MudTd>
+                        <MudTd DataLabel="Логин">@context.Login</MudTd>
+                        <MudTd DataLabel="...">
+                            <MudIconButton Icon="@(Icons.Material.Rounded.MoreHoriz)"
+                                           Link="@($"/worker/{context.Id}/")" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                <MudIconButton Icon="@(Icons.Material.Rounded.Add)" OnClick="CreateNew"/>
+            }
+        }
+    }
+}
+
+@code
+{
+    private string _login;
+
+    private string _password;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+
+    protected async Task ReadCookies()
+    {
+        _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        StateHasChanged();
+    }
+
+    private void CreateNew()
+    {
+        InsertWorker.Execute(new InsertWorker
+        {
+            Worker = new WorkerDto
+            {
+                About = "",
+                Id = 0,
+                Login = "LOGIN",
+                MyLeadIds = new int[0],
+                Name = "ИМЯ",
+                Password = "PASSWORD",
+                Patronymic = "Отчество",
+                Position = "Должность",
+                Surname = "НОВЫЙ"
+            }
+        });
+    }
+}

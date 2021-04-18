@@ -1,0 +1,106 @@
+﻿@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Commands.Worker
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject ICommandHandler<UpdateWorker> UpdateWorker
+@inject ICommandHandler<DeleteWorker> DeleteWorker
+@inject ISnackbar Snackbar
+
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <ChangeStringField FieldName="Фамилия" FieldValue="@(_worker.Surname)"
+                           Changed="@(v => _worker.Surname = v)" />
+        <ChangeStringField FieldName="Имя" FieldValue="@(_worker.Name)"
+                           Changed="@(v => _worker.Name = v)" />
+        <ChangeStringField FieldName="Отчество" FieldValue="@(_worker.Patronymic)"
+                           Changed="@(v => _worker.Patronymic = v)" />
+        <ChangeStringField FieldName="Логин" FieldValue="@(_worker.Login)"
+                           Changed="@(v => _worker.Login = v)" />
+        <ChangeStringField FieldName="Пароль" FieldValue="@(_worker.Password)"
+                           Changed="@(v => _worker.Password = v)" />
+        <ChangeStringField FieldName="Должность" FieldValue="@(_worker.Position)"
+                           Changed="@(v => _worker.Position = v)" />
+        <ChangeStringField FieldName="О человеке" FieldValue="@(_worker.About)"
+                           Changed="@(v => _worker.About = v)" />
+    </MudPaper>
+</MudContainer>
+
+@{
+    var link = "/workers/";
+
+    var saveIcon = Icons.Material.Rounded.Save;
+
+    var deleteIcon = Icons.Material.Rounded.Delete;
+
+    var backIcon = Icons.Material.Rounded.House;
+}
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <div style="display: inline-block; width: 30%">
+            <MudText Align="Align.Left">
+                <MudButton OnClick="Save" Color="Color.Info" StartIcon="@saveIcon">
+                    Coxранить
+                </MudButton>
+            </MudText>
+        </div>
+        <div style="display: inline-block; width: 30%">
+            <MudText Align="Align.Center">
+                <MudButton OnClick="() => { _showDialog = true; }" Color="Color.Error" StartIcon="@deleteIcon">
+                    Удалить
+                </MudButton>
+            </MudText>
+        </div>
+
+        <div style="display: inline-block; width: 29%">
+            <MudText Align="Align.Right">
+                <MudButton Link="@link" StartIcon="@backIcon">
+                    Назад
+                </MudButton>
+            </MudText>
+        </div>
+    </MudPaper>
+</MudContainer>
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+</MudContainer>
+<YesNoDialog Ok="@Delete" Text="Удалить сотрудника?" Visible="@_showDialog" OkLink="@link" />
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private WorkerDto _worker;
+
+    private bool _showDialog = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _worker = GetWorkers.Execute(new GetWorkers()).First(x => x.Id == Id);
+    }
+
+    private void Save()
+    {
+        UpdateWorker.Execute(new UpdateWorker
+        {
+            Worker = _worker
+        });
+
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        Snackbar.Add("Данные сохранены!", Severity.Info);
+    }
+
+    private void Delete()
+    {
+        DeleteWorker.Execute(new DeleteWorker
+        {
+            WorkerId = _worker.Id
+        });
+
+        _showDialog = false;
+    }
+}
