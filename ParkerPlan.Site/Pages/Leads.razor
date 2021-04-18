@@ -87,7 +87,8 @@
                                            StartIcon="@(Icons.Material.Rounded.Done)" />
                             }
                         }
-                        else
+                        else if (GetWorkers.Execute(new GetWorkers()).Where(x => x.Login != _login).
+                            All(x => !x.MyLeadIds.Contains(context.Id)))
                         {
                             <MudButton OnClick="() => Throw(context.Id)"
                                        StartIcon="@(Icons.Material.Rounded.NotInterested)" />
@@ -219,7 +220,7 @@ else
     {
         var me = GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login);
 
-        Service.Update(me.Login, new Dictionary<string, bool>(
+        Service.Update(me.Id.ToString(), new Dictionary<string, bool>(
             new KeyValuePair<string, bool>[]
             {
                 new("my", _my),
@@ -236,7 +237,7 @@ else
 
         try
         {
-            var filters = Service.GetAll(me.Login);
+            var filters = Service.GetAll(me.Id.ToString());
 
             _my = filters["my"];
 
@@ -250,7 +251,7 @@ else
         }
         catch (Exception e)
         {
-            Service.Insert(me.Login, new Dictionary<string, bool>(
+            Service.Insert(me.Id.ToString(), new Dictionary<string, bool>(
                 new KeyValuePair<string, bool>[]
                 {
                     new("my", false),

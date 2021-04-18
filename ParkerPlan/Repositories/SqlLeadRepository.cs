@@ -30,7 +30,7 @@ namespace ParkerPlan.Repositories
         public void Insert(Lead lead)
         {
             var max = GetAll().Max(x => x.CostumerId) ?? 0;
-            lead.CostumerId = max;
+            lead.Id = max;
             new SqlConnection(_connectionString).Insert(new SqlLeadDto
             {
                 id = lead.Id,
@@ -146,7 +146,7 @@ namespace ParkerPlan.Repositories
                     Payed = lead.payed,
                     Delivered = lead.delivered,
                     Goods = new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>("Select * FROM " +
-                        "LeadPenRel").Where(x => x.lead_id == lead.costumer_id).Select(x => new GoodLeadDto()
+                        "LeadPenRel").Where(x => x.lead_id == lead.id).Select(x => new GoodLeadDto()
                     {
                             GoodId = x.pen_id,
                             Engraving = x.engraving,

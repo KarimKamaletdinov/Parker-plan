@@ -41,14 +41,14 @@ namespace ParkerPlan.Repositories
 
             var b = new SqlConnection(_connectionString).Query<SqlLeadWorkerDto>("SELECT * FROM " +
                 "LeadWorkerRel");
-            foreach (var lw in b)
+            foreach (var lw in b.Where(x => x.worker_id == worker.Id))
             {
                 new SqlConnection(_connectionString).Delete(lw);
             }
 
             foreach (var id in worker.MyLeadIds)
             {
-                new SqlConnection(_connectionString).Update(new SqlLeadWorkerDto
+                new SqlConnection(_connectionString).Insert(new SqlLeadWorkerDto
                 {
                     worker_id = worker.Id,
                     lead_id = id
@@ -72,7 +72,7 @@ namespace ParkerPlan.Repositories
 
             var b = new SqlConnection(_connectionString).Query<SqlLeadWorkerDto>("SELECT * FROM " +
                 "LeadWorkerRel");
-            foreach (var lw in b)
+            foreach (var lw in b.Where(x => x.worker_id == worker.Id))
             {
                 new SqlConnection(_connectionString).Delete(lw);
             }

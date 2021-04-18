@@ -1,0 +1,163 @@
+﻿@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@using System.Runtime.CompilerServices
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+
+
+<MudLink Href="@("/director/")">Назад к панели управления</MudLink>
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <div>
+            <MudText Typo="Typo.h3" Align="Align.Center">
+                Суммарная стоимость заказов, тысяч рублей
+            </MudText>
+            <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
+            <MudChart ChartType="ChartType.Bar"
+                      XAxisLabels="@_lab1" ChartSeries="@_names" />
+            <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
+            <MudChart ChartType="ChartType.Bar"
+                      XAxisLabels="@_lab1" ChartSeries="@_sities" />
+            <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
+            <MudChart ChartType="ChartType.Bar"
+                      XAxisLabels="@_lab2" ChartSeries="@_months" />
+            <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
+            <MudChart ChartType="ChartType.Bar"
+                      XAxisLabels="@(new []{"Всего"})" ChartSeries="@_pens" />
+        </div>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    private WorkerDto[] _workers;
+
+    private LeadDto[] _leads;
+
+    private List<ChartSeries> _names = new();
+
+    private string[] _lab1;
+
+    private string[] _lab2 =
+    {
+        "январь",
+        "февраль",
+        "март",
+        "апрель",
+        "май",
+        "июнь",
+        "июль",
+        "август",
+        "сентябрь",
+        "октябрь",
+        "ноябрь",
+        "декабрь"
+    };
+
+    private List<ChartSeries> _sities = new();
+
+    private List<ChartSeries> _months = new();
+
+    private List<ChartSeries> _pens = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _workers = GetWorkers.Execute(new GetWorkers());
+        _leads = GetLeads.Execute(new GetLeads());
+        _lab1 = new[] { "Всего", "Средняя" };
+
+        foreach (var worker in _workers)
+        {
+            var d = 0.0;
+
+            foreach (var lead in _leads.Where(x => worker.MyLeadIds.Contains(x.Id) && x.Payed))
+            {
+                d += (double)lead.FullPrice;
+            }
+
+            _names.Add(new ChartSeries
+            {
+                Name = worker.Name + " " + worker.Surname,
+                Data = new[] {d / 1000, d / 1000 / _leads.Where(x =>
+                    worker.MyLeadIds.Contains(x.Id) && x.Payed).ToArray().Length }
+            });
+        }
+
+        var s = new List<string>();
+
+        foreach (var lead in _leads)
+        {
+            if (!s.Contains(lead.Sity))
+            {
+                s.Add(lead.Sity);
+            }
+        }
+
+        foreach (var sity in s)
+        {
+            var all = 0.0;
+
+            foreach (var l in _leads.Where(x => x.Sity == sity))
+            {
+                all += (double)l.FullPrice;
+            }
+
+            var middle = all / _leads.Where(x => x.Sity == sity).ToArray().Length;
+
+            _sities.Add(new ChartSeries()
+            {
+                Name = sity,
+                Data = new[]
+                {
+                    all / 1000,
+                    middle / 1000
+                }
+            });
+        }
+
+        var months = new double[12];
+
+        foreach (var lead in _leads)
+        {
+            months[lead.CreatingDate.Month - 1] += (int)lead.FullPrice / 1000;
+        }
+
+        _months.Add(new ChartSeries()
+        {
+            Name = "Всего",
+            Data = months
+        });
+
+        //var pens = new List<(string, int, int)>();
+        var allpens = GetGoods.Execute(new GetGoods());
+
+        foreach (var pen in allpens)
+        {
+            var p = (pen.Name, pen.Price, 0);
+
+            foreach (var l in _leads)
+            {
+                foreach (var g in l.Goods)
+                {
+                    if (g.GoodId == pen.ParkerId)
+                    {
+                        p.Item3 += g.Count;
+                    }
+                }
+            }
+
+            _pens.Add(new ChartSeries()
+            {
+                Name = p.Name,
+                Data = new double[]
+                {
+                    p.Price * p.Item3 / 1000
+                }
+            });
+        }
+    }
+}
