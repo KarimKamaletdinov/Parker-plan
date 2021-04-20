@@ -9,25 +9,126 @@
 
 <MudLink Href="@("/director/")">Назад к панели управления</MudLink>
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
-    <MudPaper Elevation="2" Class="pa-4">
-        <div>
-            <MudText Typo="Typo.h3" Align="Align.Center">
-                Суммарная стоимость заказов, тысяч рублей
-            </MudText>
-            <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
-            <MudChart ChartType="ChartType.Bar"
-                      XAxisLabels="@_lab1" ChartSeries="@_names" />
-            <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
-            <MudChart ChartType="ChartType.Bar"
-                      XAxisLabels="@_lab1" ChartSeries="@_sities" />
-            <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
-            <MudChart ChartType="ChartType.Bar"
-                      XAxisLabels="@_lab2" ChartSeries="@_months" />
-            <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
-            <MudChart ChartType="ChartType.Bar"
-                      XAxisLabels="@(new []{"Всего"})" ChartSeries="@_pens" />
-        </div>
-    </MudPaper>
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Суммарная стоимость">
+            <MudTabs PanelClass="pa-6">
+                <MudText Typo="Typo.h3" Align="Align.Center">
+                    Суммарная стоимость заказов, тысяч рублей
+                </MudText>
+                <MudTabPanel Text="Сотрудники">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab1" ChartSeries="@_names" />
+                </MudTabPanel>
+                <MudTabPanel Text="Города">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab1" ChartSeries="@_sities" />
+                </MudTabPanel>
+                <MudTabPanel Text="Месяца">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab2" ChartSeries="@_months" />
+                </MudTabPanel>
+                <MudTabPanel Text="Модели">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@(new[] {"Всего"})" ChartSeries="@_pens" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudTabPanel>
+        <MudTabPanel Text="Отношение стоимости">
+            <MudTabs PanelClass="pa-6">
+                <MudText Typo="Typo.h3" Align="Align.Center">
+                    Отношение сторимости заказов
+                </MudText>
+                <MudTabPanel Text="Сотрудники">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="_names.Select(x => x.Name).ToArray()"
+                              InputData="_names.Select(x => x.Data[0]).ToArray()" />
+                </MudTabPanel>
+                <MudTabPanel Text="Города">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="_sities.Select(x => x.Name).ToArray()"
+                              InputData="_sities.Select(x => x.Data[0]).ToArray()" />
+                </MudTabPanel>
+                <MudTabPanel Text="Месяца">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="_lab2"
+                              InputData="_months.Select(x => x.Data).ToArray()[0]" />
+                </MudTabPanel>
+                <MudTabPanel Text="Модели">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="_pens.Select(x => x.Name).ToArray()"
+                              InputData="_pens.Select(x => x.Data[0]).ToArray()" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudTabPanel>
+        <MudTabPanel Text="Суммарное количество">
+            <MudTabs PanelClass="pa-6">
+                <MudText Typo="Typo.h3" Align="Align.Center">
+                    Суммарное количество заказов
+                </MudText>
+                <MudTabPanel Text="Сотрудники">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab1" ChartSeries="@_namesc" />
+                </MudTabPanel>
+                <MudTabPanel Text="Города">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab1" ChartSeries="@_sitiesc" />
+                </MudTabPanel>
+                <MudTabPanel Text="Месяца">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab2" ChartSeries="@_monthsc" />
+                </MudTabPanel>
+                <MudTabPanel Text="Модели">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@(new[] {"единиц"})" ChartSeries="@_pensc" />
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@(new[] {"заказов"})" ChartSeries="@_penscc" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudTabPanel>
+        <MudTabPanel Text="Отношение количества">
+            <MudTabs PanelClass="pa-6">
+                <MudText Typo="Typo.h3" Align="Align.Center">
+                    Отношение количества заказов
+                </MudText>
+                <MudTabPanel Text="Сотрудники">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="@_namesc.Select(x => x.Name).ToArray()" 
+                              InputData="@_namesc.Select(x => x.Data[0]).ToArray()"/>
+                </MudTabPanel>
+                <MudTabPanel Text="Города">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="@_sitiesc.Select(x => x.Name).ToArray()" 
+                              InputData="@_sitiesc.Select(x => x.Data[0]).ToArray()"/> />
+                </MudTabPanel>
+                <MudTabPanel Text="Месяца">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab2" ChartSeries="@_monthsc" />
+                </MudTabPanel>
+                <MudTabPanel Text="Модели">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@(new[] {"единиц"})" ChartSeries="@_pensc" />
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@(new[] {"заказов"})" ChartSeries="@_penscc" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudTabPanel>
+    </MudTabs>
 </MudContainer>
 
 
@@ -38,10 +139,12 @@
 
     private List<ChartSeries> _names = new();
 
-    private string[] _lab1;
+    private List<ChartSeries> _namesc = new();
+
+    private string[] _lab1 = { "Всего" };
 
     private string[] _lab2 =
-    {
+{
         "январь",
         "февраль",
         "март",
@@ -58,9 +161,17 @@
 
     private List<ChartSeries> _sities = new();
 
+    private List<ChartSeries> _sitiesc = new();
+
     private List<ChartSeries> _months = new();
 
+    private List<ChartSeries> _monthsc = new();
+
     private List<ChartSeries> _pens = new();
+
+    private List<ChartSeries> _pensc = new();
+
+    private List<ChartSeries> _penscc = new();
 
     protected override void OnInitialized()
     {
@@ -68,22 +179,30 @@
 
         _workers = GetWorkers.Execute(new GetWorkers());
         _leads = GetLeads.Execute(new GetLeads());
-        _lab1 = new[] { "Всего", "Средняя" };
 
         foreach (var worker in _workers)
         {
             var d = 0.0;
 
+            var c = 0;
+
             foreach (var lead in _leads.Where(x => worker.MyLeadIds.Contains(x.Id) && x.Payed))
             {
                 d += (double)lead.FullPrice;
+
+                c += 1;
             }
 
             _names.Add(new ChartSeries
             {
                 Name = worker.Name + " " + worker.Surname,
-                Data = new[] {d / 1000, d / 1000 / _leads.Where(x =>
-                    worker.MyLeadIds.Contains(x.Id) && x.Payed).ToArray().Length }
+                Data = new[] {d / 1000 }
+            });
+
+            _namesc.Add(new ChartSeries
+            {
+                Name = worker.Name + " " + worker.Surname,
+                Data = new[] { (double)c }
             });
         }
 
@@ -101,29 +220,42 @@
         {
             var all = 0.0;
 
+            var c = 0;
+
             foreach (var l in _leads.Where(x => x.Sity == sity))
             {
                 all += (double)l.FullPrice;
+                c += 1;
             }
-
-            var middle = all / _leads.Where(x => x.Sity == sity).ToArray().Length;
 
             _sities.Add(new ChartSeries()
             {
                 Name = sity,
                 Data = new[]
                 {
-                    all / 1000,
-                    middle / 1000
+                    all / 1000
+                }
+            });
+
+            _sitiesc.Add(new ChartSeries()
+            {
+                Name = sity,
+                Data = new[]
+                {
+                    (double)c
                 }
             });
         }
 
         var months = new double[12];
 
+        var mc =  new double[12];
+
         foreach (var lead in _leads)
         {
             months[lead.CreatingDate.Month - 1] += (int)lead.FullPrice / 1000;
+
+            mc[lead.CreatingDate.Month - 1] += 1;
         }
 
         _months.Add(new ChartSeries()
@@ -131,13 +263,20 @@
             Name = "Всего",
             Data = months
         });
+        _monthsc.Add(new ChartSeries()
+        {
+            Name = "Всего",
+            Data = mc
+        });
 
-        //var pens = new List<(string, int, int)>();
+
         var allpens = GetGoods.Execute(new GetGoods());
 
         foreach (var pen in allpens)
         {
             var p = (pen.Name, pen.Price, 0);
+
+            var i = 0;
 
             foreach (var l in _leads)
             {
@@ -146,6 +285,7 @@
                     if (g.GoodId == pen.ParkerId)
                     {
                         p.Item3 += g.Count;
+                        i++;
                     }
                 }
             }
@@ -157,6 +297,24 @@
                 {
                     p.Price * p.Item3 / 1000
                 }
+            });
+
+            _pensc.Add(new ChartSeries()
+            {
+                Name = p.Name,
+                Data = new double[]
+                {
+                    p.Item3
+                }
+            });
+
+            _penscc.Add(new ChartSeries()
+            {
+                Name = p.Name,
+                Data = new double[]
+            {
+                    i
+            }
             });
         }
     }

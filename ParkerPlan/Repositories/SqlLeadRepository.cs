@@ -29,7 +29,7 @@ namespace ParkerPlan.Repositories
 
         public void Insert(Lead lead)
         {
-            var max = GetAll().Max(x => x.CostumerId) ?? 0;
+            var max = GetAll().Max(x => x.Id) + 1;
             lead.Id = max;
             new SqlConnection(_connectionString).Insert(new SqlLeadDto
             {
