@@ -88,6 +88,8 @@
                          Changed="@FManChanged" />
         <ChangeBoolField FieldName="Подходит для женщин" FieldValue="@_good.AbleForWoman"
                          Changed="@FWomanChanged" />
+        <ChangeIntField FieldName="Себестоимость" FieldValue="@_good.SelfPrice"
+                        Changed="SPChanged" />
     </MudPaper>
 </MudContainer>
 @{
@@ -223,6 +225,11 @@
     private void DescrChanged(string val)
     {
         _good.Description = val;
+    }
+
+    private void SPChanged(int val)
+    {
+        _good.SelfPrice = val;
     }
 
     private void Save()

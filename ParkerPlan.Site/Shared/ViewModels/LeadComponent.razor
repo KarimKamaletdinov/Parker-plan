@@ -3,11 +3,13 @@
 @using ParkerPlan.Abstractions.Commands.Lead
 @using ParkerPlan.Abstractions.Dtos
 @using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Site.Data
 @inject IQueryHandler<GetLeads, LeadDto[]> GetLeads
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject ICommandHandler<UpdateLead> UpdateLead
 @inject ICommandHandler<UpdateGood> UpdateGood
 @inject ISnackbar Snackbar
+@inject MoneyService Service
 
 @{
     _lead = GetLeads.Execute(new GetLeads()).First(x => x.Id == Id);
@@ -165,7 +167,7 @@
                 Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
                 Snackbar.Add($"Не удалось списать со склада товар {pen.Name} (ID {pen.ParkerId})" +
                     $"т.к. нет склада в городе {_lead.Sity} и не известно, с какого склада" +
-                    $"требуется их списать!",
+                    "требуется их списать!",
                     Severity.Error);
             }
 
@@ -177,6 +179,8 @@
     {
         _lead.Payed = true;
         UpdateLead.Execute(new UpdateLead { Lead = _lead });
+
+        Service.Plus(_lead);
     }
 
     private void Delivered()
@@ -189,5 +193,29 @@
     {
         _lead.Agreed = false;
         UpdateLead.Execute(new UpdateLead { Lead = _lead });
+
+        foreach (var rel in _lead.Goods)
+        {
+            var pen = GetGoods.Execute(new GetGoods()).First(x =>
+                x.ParkerId == rel.GoodId);
+            if (_lead.Sity == "Москва")
+            {
+                pen.InMsk += rel.Count;
+            }
+            else if (_lead.Sity == "Санкт-Петербург")
+            {
+                pen.InSpb += rel.Count;
+            }
+            else if (_lead.Sity == "Уфа")
+            {
+                pen.InUfa += rel.Count;
+            }
+            else if (_lead.Sity == "Екатеринбург")
+            {
+                pen.InEkt += rel.Count;
+            }
+
+            UpdateGood.Execute(new UpdateGood { Good = pen });
+        }
     }
 }
