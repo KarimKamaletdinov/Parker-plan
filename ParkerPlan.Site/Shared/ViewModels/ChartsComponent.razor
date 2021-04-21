@@ -105,26 +105,53 @@
                 <MudTabPanel Text="Сотрудники">
                     <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
                     <MudChart ChartType="ChartType.Pie"
-                              InputLabels="@_namesc.Select(x => x.Name).ToArray()" 
-                              InputData="@_namesc.Select(x => x.Data[0]).ToArray()"/>
+                              InputLabels="@_namesc.Select(x => x.Name).ToArray()"
+                              InputData="@_namesc.Select(x => x.Data[0]).ToArray()" />
                 </MudTabPanel>
                 <MudTabPanel Text="Города">
                     <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
                     <MudChart ChartType="ChartType.Pie"
-                              InputLabels="@_sitiesc.Select(x => x.Name).ToArray()" 
-                              InputData="@_sitiesc.Select(x => x.Data[0]).ToArray()"/> />
+                              InputLabels="@_sitiesc.Select(x => x.Name).ToArray()"
+                              InputData="@_sitiesc.Select(x => x.Data[0]).ToArray()" /> />
                 </MudTabPanel>
                 <MudTabPanel Text="Месяца">
                     <MudText Typo="Typo.h4" Align="Align.Center">По месяцам</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="@_lab2"
+                              InputData="@_monthsc.Select(x => x.Data).ToArray()[0]" />
+                </MudTabPanel>
+                <MudTabPanel Text="Модели">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
+                    <MudText Typo="Typo.h5" Align="Align.Center">Единиц</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="@_pensc.Select(x => x.Name).ToArray()"
+                              InputData="@_pensc.Select(x => x.Data[0]).ToArray()" />
+                    <MudText Typo="Typo.h5" Align="Align.Center">Заказов</MudText>
+                    <MudChart ChartType="ChartType.Pie"
+                              InputLabels="@_penscc.Select(x => x.Name).ToArray()"
+                              InputData="@_penscc.Select(x => x.Data[0]).ToArray()" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudTabPanel>
+        <MudTabPanel Text="Среднемесячная стоимость">
+            <MudTabs PanelClass="pa-6">
+                <MudText Typo="Typo.h3" Align="Align.Center">
+                    Среднемесячная стоимость заказов, тысяч рублей
+                </MudText>
+                <MudTabPanel Text="Сотрудники">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По сотрудникам</MudText>
                     <MudChart ChartType="ChartType.Bar"
-                              XAxisLabels="@_lab2" ChartSeries="@_monthsc" />
+                              XAxisLabels="@_lab1" ChartSeries="@_namesm" />
+                </MudTabPanel>
+                <MudTabPanel Text="Города">
+                    <MudText Typo="Typo.h4" Align="Align.Center">По городам</MudText>
+                    <MudChart ChartType="ChartType.Bar"
+                              XAxisLabels="@_lab1" ChartSeries="@_sitiesm" />
                 </MudTabPanel>
                 <MudTabPanel Text="Модели">
                     <MudText Typo="Typo.h4" Align="Align.Center">По моделям</MudText>
                     <MudChart ChartType="ChartType.Bar"
-                              XAxisLabels="@(new[] {"единиц"})" ChartSeries="@_pensc" />
-                    <MudChart ChartType="ChartType.Bar"
-                              XAxisLabels="@(new[] {"заказов"})" ChartSeries="@_penscc" />
+                              XAxisLabels="@(new[] {"Всего"})" ChartSeries="@_pensm" />
                 </MudTabPanel>
             </MudTabs>
         </MudTabPanel>
@@ -138,6 +165,8 @@
     private LeadDto[] _leads;
 
     private List<ChartSeries> _names = new();
+
+    private List<ChartSeries> _namesm = new();
 
     private List<ChartSeries> _namesc = new();
 
@@ -161,6 +190,8 @@
 
     private List<ChartSeries> _sities = new();
 
+    private List<ChartSeries> _sitiesm = new();
+
     private List<ChartSeries> _sitiesc = new();
 
     private List<ChartSeries> _months = new();
@@ -168,6 +199,8 @@
     private List<ChartSeries> _monthsc = new();
 
     private List<ChartSeries> _pens = new();
+
+    private List<ChartSeries> _pensm = new();
 
     private List<ChartSeries> _pensc = new();
 
@@ -179,6 +212,10 @@
 
         _workers = GetWorkers.Execute(new GetWorkers());
         _leads = GetLeads.Execute(new GetLeads());
+
+        var years = _leads.Max(x => x.CreatingDate.Year) -
+            _leads.Min(x => x.CreatingDate.Year) + 1;
+
 
         foreach (var worker in _workers)
         {
@@ -203,6 +240,12 @@
             {
                 Name = worker.Name + " " + worker.Surname,
                 Data = new[] { (double)c }
+            });
+
+            _namesm.Add(new ChartSeries
+            {
+                Name = worker.Name + " " + worker.Surname,
+                Data = new[] { (double)d / years / 12 / 1000}
             });
         }
 
@@ -234,6 +277,15 @@
                 Data = new[]
                 {
                     all / 1000
+                }
+            });
+
+            _sitiesm.Add(new ChartSeries()
+            {
+                Name = sity,
+                Data = new[]
+                {
+                    all / 1000 / years / 12
                 }
             });
 
@@ -295,7 +347,16 @@
                 Name = p.Name,
                 Data = new double[]
                 {
-                    p.Price * p.Item3 / 1000
+                    (double)p.Price * p.Item3 / 1000
+                }
+            });
+
+            _pensm.Add(new ChartSeries()
+            {
+                Name = p.Name,
+                Data = new double[]
+                {
+                    (double)p.Price * p.Item3 / 1000 / years / 12
                 }
             });
 
@@ -312,9 +373,9 @@
             {
                 Name = p.Name,
                 Data = new double[]
-            {
+                {
                     i
-            }
+                }
             });
         }
     }
