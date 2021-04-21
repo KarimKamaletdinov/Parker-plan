@@ -1,0 +1,145 @@
+﻿@using ParkerPlan.Abstractions
+@using ParkerPlan.Abstractions.Commands.Good
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Site.Data
+@inject IJSRuntime Js
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+@inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
+@inject ICommandHandler<UpdateGood> UpdateGood
+@inject MoneyService Service
+@inject ISnackbar Snackbar
+@page "/money/"
+
+@if (_login != null)
+{
+    @if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+    {
+        @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
+        {
+            <MudText Typo="Typo.h3" Align="Align.Center">Бухгалтерия</MudText>
+
+            <ChangeIntField FieldName="ВСЕГО" FieldValue="@Service.Money"
+                            Changed="i => Service.Money = i" />
+
+            <MudButton OnClick="() => _vvosOpen = !_vvosOpen">Завоз ручек</MudButton>
+
+            @if (_vvosOpen)
+            {
+                <MudSelect T="string" @bind-Value="@_penName">
+                    @foreach (var good in _goods)
+                    {
+                        <MudSelectItem Value="good.Name" />
+                    }
+                </MudSelect>
+
+                <PlusMinusField FieldValue="_count" Changed="i => _count = i"
+                                MaxValue="Int32.MaxValue" />
+
+                <MudText Typo="Typo.h5" Align="Align.Center">
+                    @(_good.SelfPrice * _count) руб.
+                </MudText>
+
+                <MudSelect T="Sity" @bind-Value="_sity" ToStringFunc="ToStringFunc">
+                    <MudSelectItem Value="@Sity.Moscow" />
+                    <MudSelectItem Value="@Sity.StPeterburg" />
+                    <MudSelectItem Value="@Sity.Ufa" />
+                    <MudSelectItem Value="@Sity.Ekaterinburg" />
+                </MudSelect>
+
+                <MudButton OnClick="Ok">Ok</MudButton>
+            }
+        }
+    }
+}
+
+@code {
+    private string _login;
+
+    private string _password;
+
+    private GoodDto[] _goods;
+
+    private bool _vvosOpen;
+
+    private Sity _sity;
+
+    private string _penName
+    {
+        get => _good.Name ?? "";
+        set => _good = _goods.First(x => x.Name == value);
+    }
+
+    private GoodDto _good;
+
+    private int _count;
+
+    protected override void OnInitialized()
+    {
+        ReadCookies();
+
+        base.OnInitialized();
+    }
+
+
+    protected async Task ReadCookies()
+    {
+        _login = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "login");
+        _password = await Js.InvokeAsync<string>("ReadCookie.ReadCookie", "password");
+        _goods = GetGoods.Execute(new GetGoods());
+        _good = _goods[0];
+        StateHasChanged();
+    }
+
+    private void Ok()
+    {
+        Service.Minus(_good, _count, true);
+
+        if (Service.Money < 0)
+        {
+            Service.Plus(_good, _count, true);
+
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+            Snackbar.Add("Не хватит денег!", Severity.Error);
+
+            return;
+        }
+
+        switch (_sity)
+        {
+            case Sity.Moscow:
+                _good.InMsk += _count;
+                break;
+            case Sity.StPeterburg:
+                _good.InSpb += _count;
+                break;
+            case Sity.Ufa:
+                _good.InUfa += _count;
+                break;
+            case Sity.Ekaterinburg:
+                _good.InEkt += _count;
+                break;
+        }
+
+        UpdateGood.Execute(new UpdateGood { Good = _good });
+    }
+
+    private string ToStringFunc(Sity sity)
+    {
+        switch (sity)
+        {
+            case Sity.Moscow:
+                return "Москва";
+            case Sity.StPeterburg:
+                return "Санкт-Петербург";
+            case Sity.Ufa:
+                return "Уфа";
+            case Sity.Ekaterinburg:
+                return "Екатеринбург";
+            case Sity.Another:
+                return "ERROR";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(sity), sity, null);
+        }
+    }
+}
