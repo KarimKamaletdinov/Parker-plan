@@ -8,11 +8,16 @@ namespace ParkerPlan.Site.Data
     {
         public void Insert(string path, Dictionary<string, bool> filters)
         {
-            Directory.CreateDirectory(path);
+            if (!Directory.Exists("filters"))
+            {
+                Directory.CreateDirectory("filters");
+            }
+
+            Directory.CreateDirectory("filters\\" + path);
 
             foreach (var (name, value) in filters)
             {
-                File.WriteAllText($@"{path}\{name}", value.ToString());
+                File.WriteAllText($@"filters\{ path}\{name}", value.ToString());
             }
         }
 
@@ -20,7 +25,7 @@ namespace ParkerPlan.Site.Data
         {
             foreach (var (name, value) in filters)
             {
-                File.WriteAllText($@"{path}\{name}", value.ToString());
+                File.WriteAllText($@"filters\{path}\{name}", value.ToString());
             }
         }
 
@@ -28,10 +33,10 @@ namespace ParkerPlan.Site.Data
         {
             KeyValuePair<string, bool> Selector(string x)
             {
-                return new (x.Remove(0, path.Length + 1), bool.Parse(File.ReadAllText(x)));
+                return new (x.Remove(0, ("filters\\" + path).Length + 1), bool.Parse(File.ReadAllText(x)));
             }
 
-            var result = new Dictionary<string, bool>(Directory.GetFiles(path).Select(Selector));
+            var result = new Dictionary<string, bool>(Directory.GetFiles("filters\\" + path).Select(Selector));
 
             return result;
         }

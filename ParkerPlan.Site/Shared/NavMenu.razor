@@ -36,6 +36,36 @@
             }
         }
     }
+    @if (_login != null)
+    {
+        if (GetWorkers.Execute(new GetWorkers()).Any(x => x.Login == _login))
+        {
+            @if (_password == GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Password)
+            {
+                if (GetWorkers.Execute(new GetWorkers()).First(x => x.Login == _login).Position.
+                    ToLower().Contains("Директор".ToLower()))
+                {
+                    <MudNavGroup Title="Директор" Expanded="true">
+                        <MudNavLink Href="/director/">
+                            <h4>
+                                Управление
+                            </h4>
+                        </MudNavLink>
+                        <MudNavLink Href="/workers/">
+                            <h4>
+                                Сотрудники
+                            </h4>
+                        </MudNavLink>
+                        <MudNavLink Href="/charts/">
+                            <h4>
+                                Данные
+                            </h4>
+                        </MudNavLink>
+                    </MudNavGroup>
+                }
+            }
+        }
+    }
 </MudNavMenu>
 
 @code

@@ -1,0 +1,31 @@
+﻿@using ParkerPlan.Abstractions.Queries
+@using ParkerPlan.Abstractions.Dtos
+@using ParkerPlan.Abstractions
+@inject IQueryHandler<GetWorkers, WorkerDto[]> GetWorkers
+
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudPaper Elevation="2" Class="pa-4">
+        <MudText Typo="Typo.h3" Align="Align.Center">Панель управления</MudText>
+        <MudButton Link="/workers/" StartIcon="@(Icons.Material.Filled.People)">
+            Сотрудники
+        </MudButton>
+        <MudButton Link="/charts/" StartIcon="@(Icons.Material.Filled.BarChart)">
+            Данные
+        </MudButton>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private WorkerDto _me;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _me = GetWorkers.Execute(new GetWorkers()).First(x => x.Id == Id);
+    }
+}

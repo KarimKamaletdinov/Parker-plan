@@ -10,9 +10,9 @@
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject PasswordService Service
 @inject IHttpContextAccessor Http
-@*<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+@inject ISnackbar Snackbar
 
-    </MudContainer>*@
+
 @{
     _good = GetGoods.Execute(new GetGoods()).First(x => x.ParkerId == Id);
 }
@@ -170,6 +170,9 @@
 
         await Js.InvokeAsync<object>("WriteCookie.WriteCookie", "basket", newBasketStr,
         DateTime.Now.AddYears(10).DayOfYear);
+
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        Snackbar.Add("Добавлено в корзину", Severity.Success);
     }
 
     private async Task DeleteFromBasket()
