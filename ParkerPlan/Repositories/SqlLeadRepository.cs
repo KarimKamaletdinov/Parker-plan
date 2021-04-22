@@ -29,9 +29,9 @@ namespace ParkerPlan.Repositories
 
         public void Insert(Lead lead)
         {
-            var max = GetAll().Max(x => x.Id) + 1;
-            lead.Id = max;
-            new SqlConnection(_connectionString).Insert(new SqlLeadDto
+            //var max = GetAll().Max(x => x.Id) + 1;
+            //lead.Id = max;
+            var l = new SqlLeadDto
             {
                 id = lead.Id,
                 costumer_name = lead.CustomerName,
@@ -51,7 +51,9 @@ namespace ParkerPlan.Repositories
                 comment = lead.Comment,
                 costumer_id = lead.Id,
                 full_price = lead.FullPrice
-            });
+            };
+            new SqlConnection(_connectionString).Insert(l);
+            lead.Id = l.id;
 
             foreach (var dto in new SqlConnection(_connectionString).Query<SqlGoodLeadRelDto>(
                 "SELECT * FROM LeadPenRel").Where(x => x.lead_id == lead.Id))

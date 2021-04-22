@@ -316,9 +316,13 @@ else
     {
         var goods = GetGoods.Execute(new GetGoods());
 
-        _minp = goods.Min(x => x.Price);
+        try
+        {
+            _minp = goods.Min(x => x.Price);
 
-        _maxp = goods.Max(x => x.Price);
+            _maxp = goods.Max(x => x.Price);
+        }
+        catch { }
 
         ReadCookies();
 

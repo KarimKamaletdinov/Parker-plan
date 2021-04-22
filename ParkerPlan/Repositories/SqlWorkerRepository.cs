@@ -27,7 +27,7 @@ namespace ParkerPlan.Repositories
 
         public void Insert(Worker worker)
         {
-            new SqlConnection(_connectionString).Insert(new SqlWorkerDto
+            var v = new SqlWorkerDto
             {
                 id = worker.Id,
                 name = worker.Name,
@@ -37,7 +37,10 @@ namespace ParkerPlan.Repositories
                 position = worker.Position,
                 surname = worker.Surname,
                 login = worker.Login
-            });
+            };
+            new SqlConnection(_connectionString).Insert(v);
+
+            worker.Id = v.id;
 
             var b = new SqlConnection(_connectionString).Query<SqlLeadWorkerDto>("SELECT * FROM " +
                 "LeadWorkerRel");

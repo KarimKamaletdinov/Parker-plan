@@ -4,11 +4,15 @@
 @using ParkerPlan.Abstractions.Enums
 @using ParkerPlan.Abstractions.Commands.Good
 @using ParkerPlan.Site.Data
+@using System.IO
+@using System.Threading
+@using MudBlazor.Extensions
 @inject IQueryHandler<GetGoods, GoodDto[]> GetGoods
 @inject ICommandHandler<UpdateGood> UpdateGood
 @inject ICommandHandler<DeleteGood> DeleteGood
 @inject ISnackbar Snackbar
 
+<InputFile id="fileInput" OnChange="UploadFiles" hidden multiple/>
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
     @{
         var imgUrl = $"pens/PEN{_good.ParkerId}.bmp";
@@ -17,6 +21,11 @@
         <MudItem Style="width: 50%">
             <MudPaper Elevation="2" Class="pa-4">
                 <img src="@imgUrl" />
+                <MudFab HtmlTag="label"
+                        Color="Color.Secondary"
+                        Icon="@Icons.Filled.Image"
+                        Label="Load picture"
+                        for="fileInput" />
             </MudPaper>
         </MudItem>
         <MudItem Style="width: 49%">
@@ -238,5 +247,19 @@
 
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
         Snackbar.Add("Данные сохранены!", Severity.Info);
+    }
+
+    private async Task UploadFiles(InputFileChangeEventArgs file)
+    {
+        //using var reader =
+        //    new StreamReader(file.File.OpenReadStream(long.MaxValue));
+        //var c = await reader.
+        //var m = new Memory<byte>();
+        //await file.File.OpenReadStream(long.MaxValue).ReadAsync(m);
+        MemoryStream ms = new MemoryStream();
+        await file.File.OpenReadStream().CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        File.WriteAllBytes($@"wwwroot\pens\PEN{_good.ParkerId}.bmp",
+         bytes);
     }
 }
